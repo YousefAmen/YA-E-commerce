@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-mf$hu5t$ba*qca2c24@kyd*_oqr5+2^5nyp*+p%l(9l_l_0=!m
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ya-e-commerce-production.up.railway.app','https://ya-e-commerce-production.up.railway.app']
+ALLOWED_HOSTS = ['ya-e-commerce-production.up.railway.app','https://ya-e-commerce-production.up.railway.app','127.0.0.1','localhost']
 CSRF_TRUSTED_ORIGINS = ['https://ya-e-commerce-production.up.railway.app']
 
 # Application definition
@@ -134,9 +134,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 
-STATICFILES_DIRS = ['ecom/static/']
+STATICFILES_DIRS = ['static/']
 
 
 # whitenoise static files settings
