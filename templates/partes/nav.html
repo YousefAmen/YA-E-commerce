@@ -1,5 +1,54 @@
 {% load static %}
+<style>
+    /* General container styling for alignment and spacing */
+.image-container {
+    display: inline-block; /* Keeps the image inline for navigation links */
+    margin: 0; /* Optional: Adjust margins as needed */
+  }
+  
+  /* Profile image styling */
+  .profile-image {
+    width: 40px; /* Default size for desktop */
+    height: 40px; /* Ensures a square shape */
+    object-fit: cover; /* Ensures the image fills the circle */
+    transition: transform 0.3s ease; /* Adds a hover effect */
+  }
+  
+  /* Hover effect: Slight zoom */
+  .profile-image:hover {
+    transform: scale(1.1); /* Zooms the image on hover */
+  }
+  
+  /* Media query for smaller screens */
+  @media (max-width: 768px) {
+    .profile-image {
+      width: 30px; /* Smaller size for mobile devices */
+      height: 30px;
+    }
+    .image-container {
+        margin-top: 15px;
+    }
+    .cart-icon {
+        margin: 10px;
+    }
+  }
+  
+  /* Media query for extra small screens */
+  @media (max-width: 576px) {
+    .profile-image {
+      width: 25px; /* Further reduce size on very small screens */
+      height: 25px;
 
+    }
+    .image-container {
+        margin-top: 15px;
+    }
+    .cart-icon {
+        margin: 10px;
+    }
+  }
+  
+</style>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid px-4 px-lg-5">
         <a class="navbar-brand" href="{% url 'home' %}">YA E-commerce</a>
@@ -79,23 +128,28 @@
             {% if user.is_staff %}
            
             {% else %}
-            <a class="btn btn-outline-dark me-3" href="{% url 'summary_cart' %}">
+            <a class="cart-icon btn btn-outline-dark me-3" href="{% url 'summary_cart' %}">
                 <i class="bi-cart-fill me-1"></i>
                 <span id="cart-quantity" class="badge bg-dark text-white ms-1 rounded-pill">{{cart|length}}</span>
             </a>
             {% endif %}
             {% if user.is_authenticated %}
             <div class="image-container">
-
-            <a class="nav-link active" aria-current="page" href="{% url 'profile' %}">
-                {% if user.profile.profile_image %}
-                <img style="width:40px" class="img-fluid rounded-circle img-cover"  src="{{ user.profile.profile_image.url }}"></img>
-                {% else %}
-                <img src="{% static 'images/default_website_images/default-image-writer.png' %}" alt="Profile Image" class="img-fluid rounded-circle" width="40px">
-                {% endif %}
-            </a>
-        </div>
-    {%endif%}
+                <a class="nav-link active" aria-current="page" href="{% url 'profile' %}">
+                    {% if user.profile.profile_image %}
+                    <img 
+                        class="img-fluid rounded-circle profile-image" 
+                        src="{{ user.profile.profile_image.url }}" 
+                        alt="Profile Image">
+                    {% else %}
+                    <img 
+                        class="img-fluid rounded-circle profile-image" 
+                        src="{% static 'images/default_website_images/default-image-writer.png' %}" 
+                        alt="Default Profile Image">
+                    {% endif %}
+                </a>
+            </div>
+            {% endif %}
         </div>
     </div>
 </nav>

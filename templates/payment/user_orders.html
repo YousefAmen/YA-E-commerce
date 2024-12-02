@@ -5,56 +5,45 @@
 <div class="alert alert-{{ message.tags }}" role="alert">
     {{ message }}
 </div>
-{%endfor%}
+{% endfor %}
+
 <div class="container mt-4">
-    <h1>Your Order History</h1>
+    <h1 class="text-center mb-4">Your Order History</h1>
     {% if user_orders %}
-    <table class="table table-striped">
-        <thead class="bg-dark text-white">
-            <tr>
-                <th>Order shipped</th>
-                <th>Date Placed</th>
-                <th>Total</th>
-                <th>View Details</th>
-                <th>Cancel Orders</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for order in user_orders %}
-            <tr>
-                {% if order.shipped %}
-                <td>Shipped</td>
-                {% else %}
-                <td>Pending</td>
-                {% endif %}
-                <td class="text-muted">{{ order.order_time|date:"d-M-Y-h:m:s" }}</td>
-                <td>${{ order.amount }}</td>
-                {% if order.shipped %}
-                <td><a href="{% url 'user_order_detail' order.order_uuid %}" class="btn btn-outline-primary">View Details</a>
-                </td>
-                {% else %}
-                <td><a href="{% url 'user_order_detail' order.order_uuid %}" class="btn btn-outline-primary">View Details</a>
-                </td>
-                <td><a href="{% url 'cancel_order' order.order_uuid %}" class="btn btn-outline-danger">Cancel Order</a></td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead class="bg-dark text-white">
+                <tr>
+                    <th>Order Shipped</th>
+                    <th>Date Placed</th>
+                    <th>Total</th>
+                    <th>View Details</th>
+                    <th>Cancel Orders</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in user_orders %}
+                <tr>
+                    <td>{{ order.shipped|yesno:"Shipped,Pending" }}</td>
+                    <td class="text-muted">{{ order.order_time|date:"d-M-Y h:i:s" }}</td>
+                    <td>${{ order.amount }}</td>
+                    <td>
+                        <a href="{% url 'user_order_detail' order.order_uuid %}" class="btn btn-outline-primary btn-sm">View Details</a>
+                    </td>
+                    <td>
+                        {% if not order.shipped %}
+                        <a href="{% url 'cancel_order' order.order_uuid %}" class="btn btn-outline-danger btn-sm">Cancel Order</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-    <p class="text-center">You have no previous orders.</p>
+    <p class="text-center text-muted">You have no previous orders.</p>
     {% endif %}
 </div>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
 
-{% endblock content %}
+<br>
+{% endblock %}
