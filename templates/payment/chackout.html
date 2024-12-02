@@ -1,53 +1,95 @@
 {% extends 'base.html' %}
 {% block content %}
+<style>
+  /* General Styles */
+.product-card {
+  margin-bottom: 10px;
+}
+
+/* Product Image: Uniform dimensions */
+.product-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover; /* Ensures proper cropping without stretching */
+  border-radius: 5px;
+}
+
+/* Product Name: Limit to 2 lines */
+.product-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Restrict to 2 lines */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .product-card {
+      flex-direction: column; /* Stack content for small screens */
+      text-align: center;
+  }
+
+  .product-image {
+      margin-bottom: 10px;
+  }
+}
+
+</style>
+<!-- Flash Messages -->
 {% for message in messages %}
 <div class="alert alert-{{ message.tags }}" role="alert">
     {{ message }}
-  </div>
-{%endfor%}
-<header class="bg-dark py-5">
-    <div class="container px-4 px-lg-5 my-5">
-        <div class="text-center text-white">
-            <h1 class="display-4 fw-bolder">Chackout</h1>
-            <p class="lead fw-normal text-white-80 mb-0">YA-Ecommers The Best Online Ecommers in The World.</p>
-        </div>
-    </div>
-</header>
-
-  {% for product in cart_products %}
- <div class="product-card d-flex flex-row align-items-center border-bottom border-light py-4 px-3">
-  <div class="product-image col-md-3">
-    <img src="{{ product.image.url }}" alt="{{ product.name }} Image" class="img-fluid rounded">
-  </div>
-  <div class="product-details col-md-8 ms-2">
-    <div class="product-info d-flex justify-content-between mb-2">
-      <h5 class="product-name text-dark">{{ product.name }}</h5>
-      <div class="product-price">
-        {% if product.discount %}
-          <span class="text-muted text-decoration-line-through">${{ product.discount }}</span>
-        {% endif %}
-        <span class="ms-2 fw-bold">${{ product.price }}</span>
-      </div>
-    </div>
-    <div class="product-meta d-flex flex-wrap">
-      <span class="text-muted me-2">Category:</span>
-      <span class="badge bg-dark rounded">{{ product.category }}</span>
-      <span class="text-muted ms-2">Quantity:</span>
-      {% for key,value in quantity.items %}
-      {% if key == product.id|slugify %}
-      <span class="badge bg-dark ms-1 rounded">{{ value }}</span>
-      {%endif%}
-      {% endfor %}
-    </div>
-  </div>
 </div>
 {% endfor %}
 
-<div class="cart-footer d-flex justify-content-between py-3 px-3 border-top border-light">
-  <h5 class="text-muted">Total Price: <span class="ms-2 text-dark">${{ total_price }}</span></h5>
-  <div class="buttons d-flex gap-2">
-    <a href="{% url 'summary_cart' %}" class="btn btn-primary btn-sm">Update Items</a>
-    <a href="{% url 'chackout_shipping_address' %}" class="btn btn-outline-secondary btn-sm">Continue Checkout</a>
-  </div>
+<!-- Header Section -->
+<header class="bg-dark py-5">
+    <div class="container text-center text-white">
+        <h1 class="display-4 fw-bolder">Checkout</h1>
+        <p class="lead fw-normal">YA-Ecommers: The Best Online Ecommers in The World.</p>
+    </div>
+</header>
+
+<!-- Product List -->
+<div class="container my-4">
+    {% for product in cart_products %}
+    <div class="row product-card py-3 align-items-center border-bottom">
+        <!-- Product Image -->
+        <div class="col-3 col-md-2">
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="product-image">
+        </div>
+
+        <!-- Product Details -->
+        <div class="col-9 col-md-10">
+            <div class="d-flex justify-content-between">
+                <h5 class="product-name">{{ product.name }}</h5>
+                <div>
+                    {% if product.discount %}
+                    <span class="text-muted text-decoration-line-through">${{ product.discount }}</span>
+                    {% endif %}
+                    <span class="ms-2 fw-bold">${{ product.price }}</span>
+                </div>
+            </div>
+            <p class="text-muted mb-1">Category: {{ product.category }}</p>
+            {% for key, value in quantity.items %}
+                {% if key == product.id|slugify %}
+                <span class="badge bg-dark ms-1">{{ value }}</span>
+                {% endif %}
+                {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Footer Section -->
+<div class="container text-center py-3">
+    <h5>Total Price: <span class="fw-bold">${{ total_price }}</span></h5>
+    <div class="d-flex justify-content-center gap-3 mt-3">
+        <a href="{% url 'summary_cart' %}" class="btn btn-primary">Update Items</a>
+        <a href="{% url 'chackout_shipping_address' %}" class="btn btn-secondary">Continue Checkout</a>
+    </div>
 </div>
 {% endblock content %}
