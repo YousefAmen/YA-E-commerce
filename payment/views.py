@@ -170,9 +170,6 @@ def billing_info(request):
                   if not order_data:
                       messages.error(request, 'Order not found. Please start the order process again.')
                       return redirect('checkout')
-                  # get the host 
-                  
-                  
                   # Create and save the order instance
                   order = Order.objects.create(
                       shipping_address_id=order_data['shipping_address_id'],
@@ -218,7 +215,6 @@ def billing_info(request):
           "notify_url": f"https://{host}{reverse('paypal-ipn')}",
           "return_url": f"https://{host}{reverse('payment_success')}",
           "cancel_url": f"https://{host}{reverse('payment_failed')}",
-          "custom": "premium_plan",  # Custom command to correlate to some function later (optional)
         }
         # create the paypal forms
         paypal_form = PayPalPaymentsForm(initial=paypal_dict)
