@@ -1,8 +1,9 @@
-from django.urls import path
+from django.urls import path,include
 from .views import  (
   chackout,payment_process,billing_info,user_orders_detail,shipped_orders_dashboard,
   chackout_shipping_address,add_shippingAddress,user_orders,cancel_order,unshipped_orders_dashboard,
-  update_shipping_address,delete_shipping_address,order_process,user_shipping_addresses
+  update_shipping_address,delete_shipping_address,order_process,user_shipping_addresses,
+  payment_success,payment_failed 
   )
 
 
@@ -22,6 +23,9 @@ urlpatterns = [
   # shipped and unshipped page for the admin 
   path('shipped_orders_dashboard/',shipped_orders_dashboard,name = 'shipped_orders_dashboard'),
   path('unshipped_orders_dashboard/',unshipped_orders_dashboard,name = 'unshipped_orders_dashboard'),
-  
+  path('payment_success/',payment_success,name = 'payment_success'),
+  path('payment_failed/',payment_failed,name = 'payment_failed'),
+  # paypal url
+  path('paypal/', include("paypal.standard.ipn.urls")),
 
 ]

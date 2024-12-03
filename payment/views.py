@@ -9,6 +9,11 @@ from store.models import Product
 from members.models import Profile
 from decimal import Decimal
 from django.db import transaction
+# import paypal stuff
+from django.urls import reverse
+from paypal.standard.forms import PayPalPaymentsForm
+from django.conf import settings
+import uuid
 
 
 def chackout(request):
@@ -165,7 +170,9 @@ def billing_info(request):
                   if not order_data:
                       messages.error(request, 'Order not found. Please start the order process again.')
                       return redirect('checkout')
-
+                  # get the host 
+                  
+                  
                   # Create and save the order instance
                   order = Order.objects.create(
                       shipping_address_id=order_data['shipping_address_id'],
@@ -198,11 +205,25 @@ def billing_info(request):
                 return redirect('/')
             
             except Exception as error:
-                messages.info(request, f'Order not placed. Please try again: {error}')
+                messages.info(request, f'Order not placed. Please try again')
                 return redirect('/')
-
+        host = request.get_host()
+        paypal_dict = {
+          "business": settings.PAYPAL_RECEIVER_EMAIL,
+          "amount": total,
+          "item_name":"order_items",
+          "no_shipping":'2',
+          "invoice": str(uuid.uuid4()),
+          "currency_code" : "USD",
+          "notify_url": f"https://{host}{reverse('paypal-ipn')}",
+          "return_url": f"https://{host}{reverse('payment_success')}",
+          "cancel_url": f"https://{host}{reverse('payment_failed')}",
+          "custom": "premium_plan",  # Custom command to correlate to some function later (optional)
+        }
+        # create the paypal forms
+        paypal_form = PayPalPaymentsForm(initial=paypal_dict)
         billing_forms = PaymentForm()
-        context = {'payment_form': billing_forms}
+        context = {'payment_form': billing_forms,'paypal_form':paypal_form}
         return render(request, 'payment/billing_info.html', context)
     else:
         messages.warning(request, 'You must be logged in to proceed with payment.')
@@ -261,3 +282,30 @@ def unshipped_orders_dashboard(request):
   return render(request,'payment/unshipped_orders_dashboard.html',context)
 
 
+# def view_that_asks_for_money(request):
+
+#     # What you want the button to do.
+#     paypal_dict = {
+#         "business": "receiver_email@example.com",
+#         "amount": "10000000.00",
+#         "item_name": "name of the item",
+#         "invoice": "unique-invoice-id",
+#         "notify_url": request.build_absolute_uri(reverse('paypal-ipn')),
+#         "return": request.build_absolute_uri(reverse('your-return-view')),
+#         "cancel_return": request.build_absolute_uri(reverse('your-cancel-view')),
+#         "custom": "premium_plan",  # Custom command to correlate to some function later (optional)
+#     }
+
+#     # Create the instance.
+#     form = PayPalPaymentsForm(initial=paypal_dict)
+#     context = {"form": form}
+#     return render(request, "payment/payment_page.html", context)
+
+
+def payment_success(request):
+  return render(request,'payment/payment_success.html')
+  
+
+def payment_failed(request):
+  return render(request,'payment/payment_failed.html')
+  

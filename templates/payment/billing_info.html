@@ -13,16 +13,19 @@
         <div class="col-md-6">
             <div class="card p-4">
                 <h4 class="card-title text-center">Billing Information</h4>
-                <form method="POST" >
+                <form method="POST">
                     {% csrf_token %}
                     {{ payment_form.as_p }}
                     <button type="submit" class="btn btn-outline-secondary btn-block mt-3">
                         Pay Now
                     </button>
                 </form>
+                    <div class="d-flex justify-content-end">
+                        {{ paypal_form.render }}
+                    </div>
             </div>
         </div>
     </div>
-    
-    </div>
+</div>
+
 {% endblock content %}

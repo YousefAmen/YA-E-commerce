@@ -15,7 +15,7 @@ import os
 from dotenv import load_dotenv
 
 
-load_dotenv()
+# load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'members',
     'cart',
     'payment',
+    # paypal app
+    'paypal.standard.ipn',
 ]
 
 MIDDLEWARE = [
@@ -151,3 +153,9 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# paypal settings
+
+PAYPAL_TEST = True
+
+PAYPAL_RECEIVER_EMAIL = 'yousefbusiness@gmail.com' # Business Sandbox account
