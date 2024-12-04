@@ -143,7 +143,8 @@ def order_process(request, token):
                 'full_name': shipping_address.shipping_full_name,
                 'summary_shipping_address': shipping_address_summary
             }
-            
+            print(f"---{request.session['order_data']}---")
+            print(cart.get_products())
             context = {'order':order,'cart_products': products, 'quantity': quantity}
             return render(request, 'payment/order_details.html', context)
         

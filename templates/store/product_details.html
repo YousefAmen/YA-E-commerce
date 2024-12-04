@@ -210,9 +210,6 @@
             {% endif %}
           </div>
         </div>
-        
-        
-
 
         <label class="ps-3 quantity-label">Quantity</label>
         <div class="row ps-3 pt-1">
@@ -227,7 +224,7 @@
           </div>
         </div>
         <div class="card-footer p-4 pt-5 border-top-0 bg-transparent d-flex justify-content-center">
-          <a class="btn btn-outline-dark mt-auto flex-grow-1" href="{% url 'chackout_shipping_address'  %}">Buy Now</a>
+          <a class="btn btn-outline-dark mt-auto flex-grow-1" href="{% url 'home'  %}">Back To Home</a>
           <form action="" method="POST">
             {% csrf_token %}
             <button type="submit" class="btn btn-dark t btn-sm ms-3" value="{{product.id}}" id="add-cart"> <i
