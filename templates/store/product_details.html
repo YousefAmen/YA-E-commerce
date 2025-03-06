@@ -129,7 +129,7 @@
     {{ message }}
   </div>
   {%endfor%}
-  <div id="message-container"></div>
+  <div id="message-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
     <div class="row g-0">
       <div class="d-flex justify-content-end align-items-center">
         {% if user.is_authenticated %}
@@ -165,8 +165,12 @@
           <span class="card-text">{{product.price}}$</span>
           <br>
           {%endif%}
+          {% if product.instock == "0" %}
           <span class="card-text">in Stock:</span>
           <span class="card-text">{{product.instock}}</span>
+          {% else %}
+          <span class="card-text">Temporarily out of stock.</span>
+          {% endif %}
           <div class="d-flex small text-warning mb-2">
             <div class="bi-star-fill"></div>
             <div class="bi-star-fill"></div>
@@ -214,22 +218,27 @@
         <label class="ps-3 quantity-label">Quantity</label>
         <div class="row ps-3 pt-1">
           <div class="col-md-2">
-            <select class="form-select" id="qty-cart">
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-            </select>
+              {% if product.instock != 0 %}
+                  <select class="form-select" id="qty-cart">
+                      {% for i in "x"|rjust:product.instock %}
+                          <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                      {% endfor %}
+                  </select>
+              {% else %}
+                  <span style="display: flex;" class="fw-bold bg-light">
+                      Temporarily out of stock.
+                  </span>
+              {% endif %}
           </div>
-        </div>
+      </div>
         <div class="card-footer p-4 pt-5 border-top-0 bg-transparent d-flex justify-content-center">
           <a class="btn btn-outline-dark mt-auto flex-grow-1" href="{% url 'home'  %}">Back To Home</a>
           <form action="" method="POST">
             {% csrf_token %}
-            <button type="submit" class="btn btn-dark t btn-sm ms-3" value="{{product.id}}" id="add-cart"> <i
+            <button type="submit" class="btn btn-dark t btn-sm ms-3 shippingIcon" value="{{product.id}}" id="add-cart" data-instock="{{ product.instock }}"> <i
                 class="fa-solid fa-cart-shopping"></i>
             </button>
+
           </form>
           
         </div>
@@ -264,9 +273,16 @@
 
 
 <script>
+
   $(document).on('click', '#add-cart', function (e) {
     e.preventDefault();
+    let instock = $(this).data('instock')
+    if ( instock === 0 ) {
+      showMessage('This product is temporarily out of stock cannot added in the cart.', 'warning');
+    } else {
+
     $.ajax({
+      
       type: 'POST',
       url: "{% url 'add_cart' %}",
       data: {
@@ -275,6 +291,7 @@
         csrfmiddlewaretoken: '{{csrf_token}}',
         action: 'post'
       },
+
       success: function (json) {
         //console.log(json)
         document.getElementById('cart-quantity').
@@ -283,6 +300,7 @@
       error: function (xhr, errmsg, err) {
       }
     });
+    }
   })
 
 
@@ -332,6 +350,8 @@ $(document).on('click', '#add-fav', function (e) {
         $('.alert').alert('close');
     }, 3000);
   }
+ 
+ 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </body>

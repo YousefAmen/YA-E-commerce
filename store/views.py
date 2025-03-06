@@ -219,15 +219,15 @@ def remove_favourite_product(request,slug):
 
 def popular_products(request,num_products=10):
   # get the products id and use the annotate function to add likes_count filed to count favourites 
-  products_with_id = Product.objects.values('id').annotate(likes_count = Count('favourites')).order_by('-likes_count')[:num_products]
-  print(products_with_id)
+  products = Product.objects.values('id').annotate(likes_count = Count('favourites')).order_by('-likes_count')[:num_products]
+  
   # extract the products ids in list
-  extract_products = products_with_id.values_list('id',flat = True)
-  products = Product.objects.filter(id__in=extract_products) \
+  products_ids = products.values_list('id',flat = True)
+  popular_products = Product.objects.filter(id__in=products_ids) \
     .annotate(likes_count=Count('favourites')) \
     .order_by('-likes_count')[:num_products]
-  print(products)
-  context  = {'products':products}
+  
+  context  = {'products':popular_products}
   return render(request,'store/popular_products.html',context)
 
 
@@ -236,6 +236,7 @@ def most_sold_products(request, num_products=10):
   product_ids_with_quantity = OrderItem.objects.values('products_id')  \
     .annotate(total_quantity=Sum('quantity')) \
     .order_by('-total_quantity')[:num_products]
+  
   # extract the products ids from product_ids_with_quantity and add him flat list,flat=True  makes sure result is list not list of tuples.
   product_ids = product_ids_with_quantity.values_list('products_id', flat=True)
   """

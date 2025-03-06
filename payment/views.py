@@ -143,8 +143,8 @@ def order_process(request, token):
                 'full_name': shipping_address.shipping_full_name,
                 'summary_shipping_address': shipping_address_summary
             }
-            print(f"---{request.session['order_data']}---")
-            print(cart.get_products())
+            
+            
             context = {'order':order,'cart_products': products, 'quantity': quantity}
             return render(request, 'payment/order_details.html', context)
         
@@ -158,13 +158,14 @@ def order_process(request, token):
 
 def billing_info(request):
     if request.user.is_authenticated:
+      
         cart = Cart(request)
         total = cart.total_price()
         products = cart.get_products()
         quantity = cart.get_quantitys()
 
         if request.method == "POST":
-            try:
+            # try:
                 # Retrieve the order data from session
                 with transaction.atomic():
                   order_data = request.session.get('order_data')
@@ -180,19 +181,25 @@ def billing_info(request):
                       full_name=order_data['full_name'],
                       summary_shipping_address=order_data['summary_shipping_address']
                   )
-
+                  
                   # Create OrderItems for each product in the cart
                   for product in products:
                       product_quantity = quantity.get(str(product.id), 0)
                       if product_quantity > 0:
-                          OrderItem.objects.get_or_create(
-                              order=order,
-                              products=product,
-                              user=request.user,
-                              price=product.price,
-                              quantity=product_quantity
-                          )
-                  
+                        if product.instock != 0:
+                            OrderItem.objects.get_or_create(
+                                order=order,
+                                products=product,
+                                user=request.user,
+                                price=product.price,
+                                quantity=product_quantity
+                            )
+                            
+                            product.instock -= product_quantity
+                            product.save()
+                        else:
+                          messages.info(request, f'"{product.name}" is now out of stock.')
+
                   # Clear the session and cart
                   for key in list(request.session.keys()):
                     if key == "session_key":
@@ -202,9 +209,9 @@ def billing_info(request):
                 messages.success(request,f'Order Pleced Successfully {request.user.profile.first_name}.')
                 return redirect('/')
             
-            except Exception as error:
-                messages.info(request, f'Order not placed. Please try again')
-                return redirect('/')
+            # except Exception as error:
+            #     messages.info(request, f'Order not placed. Please try again')
+            #     return redirect('/')
         host = request.get_host()
         paypal_dict = {
           "business": settings.PAYPAL_RECEIVER_EMAIL,

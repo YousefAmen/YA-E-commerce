@@ -143,7 +143,11 @@
                                         </p>
                                         <p class="card-text">
                                             <strong>In Stock:</strong>
+                                            {% if product.instock > 0 %}
                                             <span>{{product.instock}}</span></p>
+                                            {% else %}
+                                            <span class="out-of-stock">Temporarily out of stock.</span>
+                                            {% endif %}
                                         <div class="d-flex justify-content-between align-items-center">
                                             <a href="{% url 'product_details' product.slug %}" class="btn btn-outline-dark">View Details</a>
                                         </div>
