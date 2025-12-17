@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/account/management_orders_dashboard.css' %}">
+{% endblock %}
+
+<!-- Messages Display -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-boxes me-2" style="color: #7c6fd6;"></i>
+            Order Management Center
+        </h1>
+        <p class="page-subtitle">Monitor, track, and manage all your store orders in one place</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-purple">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div class="stat-label">Total Orders</div>
+                <h3 class="stat-value">{{ total_orders }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-green">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="stat-label">Total Revenue</div>
+                <h3 class="stat-value">${{ orders_revenue|floatformat:2 }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-cyan">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="stat-label">Average Order</div>
+                <h3 class="stat-value">${{ avg_orders_value|floatformat:2 }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-pink">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-label">Total Customers</div>
+                <h3 class="stat-value">{{ total_customers }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Orders -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-hourglass-start me-2" style="color: #f59e0b;"></i>
+                Pending Orders
+                <span class="section-badge" style="background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);">
+                    {{ order_status.pending_status|length }}
+                </span>
+            </h3>
+        </div>
+        {% if order_status.pending_status %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in order_status.pending_status %}
+                    <tr>
+                        <td class="fw-semibold" style="color: #a78bfa;">#{{ order.id }}</td>
+                        <td>{{ order.user.first_name|title }} {{ order.user.last_name|title }}</td>
+                        <td style="color: #cbd5e0;">{{ order.email }}</td>
+                        <td>{{ order.date_ordered|date:'d-M-Y, h:i A' }}</td>
+                        <td>{{ order.shipping_address.shipping_country }}</td>
+                        <td class="fw-semibold" style="color: #4ade80;">${{ order.amount|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <span class="badge-pending">
+                                <i class="fas fa-hourglass-start me-1"></i>Pending
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}"
+                                class="btn btn-details btn-sm me-1">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <form action="{% url 'confirm_order' %}" method="POST">
+                                {% csrf_token %}
+                                <button type="button" class="btn btn-action btn-confirm btn-sm button-confirm"
+                                    value="{{order.id}}">
+                                    <i class="fas fa-check me-1"></i>Confirm
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-hourglass-start"></i></div>
+            <p class="mb-0">No pending orders</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Confirmed Orders -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-check-circle me-2" style="color: #3b82f6;"></i>
+                Confirmed Orders
+                <span class="section-badge" style="background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);">
+                    {{ order_status.confirmed_status|length }}
+                </span>
+            </h3>
+        </div>
+        {% if order_status.confirmed_status %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in order_status.confirmed_status %}
+                    <tr>
+                        <td class="fw-semibold" style="color: #a78bfa;">#{{ order.id }}</td>
+                        <td>{{ order.user.first_name|title }} {{ order.user.last_name|title }}</td>
+                        <td style="color: #cbd5e0;">{{ order.email }}</td>
+                        <td>{{ order.date_ordered|date:'d-M-Y, h:i A' }}</td>
+                        <td>{{ order.shipping_address.shipping_country }}</td>
+                        <td class="fw-semibold" style="color: #4ade80;">${{ order.amount|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <span class="badge-confirmed">
+                                <i class="fas fa-check-circle me-1"></i>Confirmed
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}"
+                                class="btn btn-details btn-sm me-1">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <form action="{% url 'mark_shipped_orders' %}" method="POST">
+                                <button type="button" class="btn btn-action btn-ship  btn-sm shipped-button"
+                                    value="{{order.id}}">
+                                    <i class="fas fa-truck me-1"></i>Shipped
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
+            <p class="mb-0">No confirmed orders</p>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Shipped Orders -->
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-shipping-fast me-2" style="color: #14b8a6;"></i>
+                Shipped Orders
+                <span class="section-badge" style="background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);">
+                    {{ order_status.shipped_status|length }}
+                </span>
+            </h3>
+        </div>
+        {% if order_status.shipped_status %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Date Shipped</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in order_status.shipped_status %}
+                    <tr>
+                        <td class="fw-semibold" style="color: #a78bfa;">#{{ order.id }}</td>
+                        <td>{{ order.user.first_name|title }} {{ order.user.last_name|title }}</td>
+                        <td style="color: #cbd5e0;">{{ order.email }}</td>
+                        <td>{{ order.date_shipped|date:'d-M-Y, h:i A' }}</td>
+                        <td>{{ order.shipping_address.shipping_country }}</td>
+                        <td class="fw-semibold" style="color: #4ade80;">${{ order.amount|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <span class="badge-shipped">
+                                <i class="fas fa-shipping-fast me-1"></i>Shipped
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}"
+                                class="btn btn-details btn-sm me-1">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                            <form action="{% url 'mark_delivered_orders' %}" method="POST">
+                                <button type="button" class="btn btn-action btn-deliver btn-sm delivered-button"
+                                    value="{{order.id}}">
+                                    <i class="fas fa-box me-1"></i>Deliver
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-shipping-fast"></i></div>
+            <p class="mb-0">No shipped orders</p>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-box-open me-2" style="color: #22c55e;"></i>
+                Delivered Orders
+                <span class="section-badge" style="background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);">
+                    {{ order_status.delivered_status|length }}
+                </span>
+            </h3>
+        </div>
+        {% if order_status.delivered_status %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Date Delivered</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in order_status.delivered_status %}
+                    <tr>
+                        <td class="fw-semibold" style="color: #a78bfa;">#{{ order.id }}</td>
+                        <td>{{ order.user.username|title }}</td>
+                        <td style="color: #cbd5e0;">{{ order.email }}</td>
+                        <td>{{ order.date_delivered|date:'d-M-Y, h:i A' }}</td>
+                        <td>{{ order.shipping_address.shipping_country }}</td>
+                        <td class="fw-semibold" style="color: #4ade80;">${{ order.amount|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <span class="badge-delivered">
+                                <i class="fas fa-box-open me-1"></i>Delivered
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}"
+                                class="btn btn-details btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-box-open"></i></div>
+            <p class="mb-0">No delivered orders</p>
+        </div>
+        {% endif %}
+    </div>
+
+
+    <!-- Cancelled Orders
+    <div class="table-section">
+        <div class="table-header">
+            <h3 class="table-title">
+                <i class="fas fa-times-circle me-2" style="color: #ef4444;"></i>
+                Cancelled Orders
+                <span class="section-badge" style="background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);">
+                    {{ cancelled_orders|length }}
+                </span>
+            </h3>
+        </div>
+        {% if cancelled_orders %}
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Order ID</th>
+                        <th scope="col">Customer</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Date Cancelled</th>
+                        <th scope="col">Country</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col" class="text-center">Status</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in cancelled_orders %}
+                    <tr>
+                        <td class="fw-semibold" style="color: #a78bfa;">#{{ order.id }}</td>
+                        <td>{{ order.user.username|title }}</td>
+                        <td style="color: #cbd5e0;">{{ order.email }}</td>
+                        <td>{{ order.date_cancelled|date:'d-M-Y, h:i A' }}</td>
+                        <td>{{ order.shipping_address.shipping_country }}</td>
+                        <td class="fw-semibold" style="color: #f87171;">${{ order.amount|floatformat:2 }}</td>
+                        <td class="text-center">
+                            <span class="badge-cancelled">
+                                <i class="fas fa-times-circle me-1"></i>Cancelled
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}"
+                                class="btn btn-details btn-sm">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-times-circle"></i></div>
+            <p class="mb-0">No cancelled orders</p>
+        </div>
+        {% endif %}
+    </div> -->
+</div>
+
+
+<script>
+    $(document).on('click', '.button-confirm', function (e) {
+        e.preventDefault();
+
+        var orderId = $(this).val();
+        var button = $(this);
+
+        // Disable button during request
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Confirming...');
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'confirm_order' %}",
+            data: {
+                order_id: orderId,
+                csrfmiddlewaretoken: '{{csrf_token}}'
+            },
+            success: function (json) {
+                if (json.message === 'success') {
+                    // Show toast notification
+                    showToast('Success!', 'Order confirmed successfully', 'success');
+
+                    // Wait 1 second then reload
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                showToast('Error!', 'Failed to confirm order', 'error');
+                button.prop('disabled', false).html('<i class="fas fa-check me-1"></i>Confirm');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+    // Toast notification function
+    function showToast(title, message, type) {
+        var bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        var toast = $(`
+            <div class="custom-toast" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            ">
+                <i class="fas ${icon}"></i>
+                <div>
+                    <strong>${title}</strong>
+                    <div style="font-size: 14px;">${message}</div>
+                </div>
+            </div>
+        `);
+
+        $('body').append(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(function () {
+            toast.fadeOut(300, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+
+
+    $(document).on('click', '.shipped-button', function (e) {
+        e.preventDefault();
+
+        var orderId = $(this).val();
+        var button = $(this);
+
+        // Disable button during request
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Confirming...');
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'mark_shipped_orders' %}",
+            data: {
+                order_id: orderId,
+                csrfmiddlewaretoken: '{{csrf_token}}'
+            },
+            success: function (json) {
+                if (json.message === 'success') {
+                    // Show toast notification
+                    showToast('Success!', 'Order shipped successfully', 'success');
+
+                    // Wait 1 second then reload
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                showToast('Error!', 'Failed to confirm order', 'error');
+                button.prop('disabled', false).html('<i class="fas fa-check me-1"></i>Confirm');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+    // Toast notification function
+    function showToast(title, message, type) {
+        var bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        var toast = $(`
+            <div class="custom-toast" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            ">
+                <i class="fas ${icon}"></i>
+                <div>
+                    <strong>${title}</strong>
+                    <div style="font-size: 14px;">${message}</div>
+                </div>
+            </div>
+        `);
+
+        $('body').append(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(function () {
+            toast.fadeOut(300, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+
+
+    $(document).on('click', '.delivered-button', function (e) {
+        e.preventDefault();
+
+        var orderId = $(this).val();
+        var button = $(this);
+
+        // Disable button during request
+        button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i>Confirming...');
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'mark_delivered_orders' %}",
+            data: {
+                order_id: orderId,
+                csrfmiddlewaretoken: '{{csrf_token}}'
+            },
+            success: function (json) {
+                if (json.message === 'success') {
+                    // Show toast notification
+                    showToast('Success!', 'Order delivered successfully', 'success');
+
+                    // Wait 1 second then reload
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+                }
+            },
+            error: function (xhr, errmsg, err) {
+                showToast('Error!', 'Failed to confirm order', 'error');
+                button.prop('disabled', false).html('<i class="fas fa-check me-1"></i>Confirm');
+                console.log(xhr.status + ": " + xhr.responseText);
+            }
+        });
+    });
+
+    // Toast notification function
+    function showToast(title, message, type) {
+        var bgColor = type === 'success' ? '#28a745' : '#dc3545';
+        var icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+
+        var toast = $(`
+            <div class="custom-toast" style="
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${bgColor};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: slideIn 0.3s ease;
+            ">
+                <i class="fas ${icon}"></i>
+                <div>
+                    <strong>${title}</strong>
+                    <div style="font-size: 14px;">${message}</div>
+                </div>
+            </div>
+        `);
+
+        $('body').append(toast);
+
+        // Auto remove after 3 seconds
+        setTimeout(function () {
+            toast.fadeOut(300, function () {
+                $(this).remove();
+            });
+        }, 3000);
+    }
+</script>
+
+<style>
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock content %}

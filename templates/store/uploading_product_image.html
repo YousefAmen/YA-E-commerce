@@ -1,0 +1,344 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/upload_product_image.css' %}">
+{% endblock %}
+<div class="add-product-container">
+    <div class="container py-5">
+        <!-- Back Button -->
+        <div class="mb-4">
+            <a href="javascript:history.back()" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <div class="category-badge mb-3">
+                <i class="fas fa-images me-2"></i>
+                Product Images
+            </div>
+            <h1 class="page-title mb-2">Upload Product Photos</h1>
+            <p class="page-subtitle">Add high-quality images to showcase your product</p>
+        </div>
+
+        <!-- Progress Indicator - 5 Steps -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="steps-container">
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Category</p>
+                    </div>
+                    <div class="step-line step-line-complete"></div>
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Subcategory</p>
+                    </div>
+                    <div class="step-line step-line-complete"></div>
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Product Details</p>
+                    </div>
+                    <div class="step-line step-line-complete"></div>
+                    <div class="step-item step-active">
+                        <div class="step-circle">
+                            <strong>4</strong>
+                        </div>
+                        <p class="step-label">Upload Images</p>
+                    </div>
+                    <div class="step-line step-line-inactive"></div>
+                    <div class="step-item step-inactive">
+                        <div class="step-circle">
+                            <strong>5</strong>
+                        </div>
+                        <p class="step-label">Inventory</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert" role="alert">
+            <i
+                class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+
+
+        <!-- Form Card -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="form-card">
+                    <!-- Image Upload Form -->
+                    <form method="POST" enctype="multipart/form-data" id="imageUploadForm">
+                        {% csrf_token %}
+
+                        <div class="form-sections" data-has-primary="{{ has_primary }}">
+                            <!-- Upload Zone -->
+                            <div class="upload-zone" id="uploadZone">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h3 class="upload-title">Drag & Drop Image Here</h3>
+                                <p class="upload-subtitle">or click to browse from your device</p>
+                                <button type="button" class="btn-browse"
+                                    onclick="document.getElementById('id_image').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Browse Files
+                                </button>
+
+                                <!-- Hidden Form Fields -->
+                                <input type="file" name="image" id="id_image"
+                                    accept="image/jpeg,image/jpg,image/png,image/webp" style="display: none;">
+
+                                <div class="upload-info mt-4">
+                                    <div class="info-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Supported: JPG, PNG, WEBP</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Max size: 5MB per image</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Upload images one by one</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Image Preview - Compact -->
+                            <div id="imagePreviewContainer" class="image-preview-container mt-4" style="display: none;">
+                                <div class="preview-header">
+                                    <h4 class="preview-title">
+                                        <i class="fas fa-image me-2"></i>
+                                        Selected Image
+                                    </h4>
+                                    <button type="button" class="btn-clear" onclick="clearImage()">
+                                        <i class="fas fa-times me-2"></i>Clear
+                                    </button>
+                                </div>
+
+                                <div class="preview-content">
+                                    <div id="imagePreview" class="compact-image-preview"></div>
+
+                                    <!-- Primary Image Checkbox -->
+                                    <div class="primary-checkbox-side">
+                                        <label class="primary-checkbox-label" id="primaryLabel">
+                                            <input type="checkbox" name="is_primary" id="id_is_primary">
+                                            <span class="checkbox-text">
+                                                <i class="fas fa-star me-2"></i>Set as Main Product Image
+                                            </span>
+                                        </label>
+                                        <small class="form-text d-block mt-2" id="primaryHelpText">
+                                            The main image will be displayed first in product listings
+                                        </small>
+                                        <div id="primaryWarning" class="primary-warning" style="display: none;">
+                                            <i class="fas fa-exclamation-circle me-2"></i>
+                                            Another image is already set as main. Uncheck to set this one instead.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Display Form Errors -->
+                            {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                                <strong>Error:</strong>
+                                <ul class="mb-0">
+                                    {% for field in form %}
+                                    {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                    {% endfor %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="image">
+                            {% for image in product.images.all %}
+                            <div class="image-item" title="{{ image.image.name }}">
+                                <img src="{{ image.image.url }}" alt="Product Image {{ forloop.counter }}">
+                                <div class="image-label">
+                                    #{{ forloop.counter }} - {{ image.image.name|truncatechars:15 }}
+                                </div>
+                                {% if image.is_primary %}
+                                <div class="primary-badge" style="top: 8px; left: 8px;">
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <a href="javascript:history.back()" class="btn-cancel">
+                                <i class="fas fa-arrow-left me-2"></i>Previous Step
+                            </a>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="submit" class="btn-submit" id="uploadBtn" disabled>
+                                    <i class="fas fa-upload me-2"></i>Upload This Image
+                                </button>
+                                <a href="{% url 'add_product_inventory' slug=product.slug id=product.id %}"
+                                    class="btn-submit btn-next">
+                                    <i class="fas fa-arrow-right me-2"></i>Next: Inventory
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Help Card -->
+                <div class="help-card mt-4">
+                    <div class="d-flex align-items-start">
+                        <div class="help-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="help-title">Image Guidelines</h5>
+                            <ul class="help-list">
+                                <li>Use clear, well-lit photos on a neutral background</li>
+                                <li>Upload images one by one - you can add multiple</li>
+                                <li>Mark your best image as "Main Product Image"</li>
+                                <li>Avoid blurry or pixelated images</li>
+                                <li>Include different angles and close-ups</li>
+                                <li>Click "Continue to Inventory" when done</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.getElementById('id_image');
+    const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+    const imagePreview = document.getElementById('imagePreview');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const primaryCheckbox = document.getElementById('id_is_primary');
+    const primaryLabel = document.getElementById('primaryLabel');
+    const primaryWarning = document.getElementById('primaryWarning');
+    const primaryHelpText = document.getElementById('primaryHelpText');
+
+    // Check if there's already a primary image - FIXED CONDITION
+    // Check if there's already a primary image - SIMPLE AND WORKS
+    const hasPrimaryImage = document.querySelector('.form-sections').dataset.hasPrimary === 'True';
+    // Initialize primary checkbox state
+    function initializePrimaryCheckbox() {
+        if (hasPrimaryImage) {
+            primaryCheckbox.disabled = true;
+            primaryCheckbox.checked = false;
+            primaryLabel.style.opacity = '0.6';
+            primaryLabel.style.cursor = 'not-allowed';
+            primaryWarning.style.display = 'flex';
+            primaryHelpText.style.display = 'none';
+        } else {
+            primaryCheckbox.disabled = false;
+            primaryLabel.style.opacity = '1';
+            primaryLabel.style.cursor = 'pointer';
+            primaryWarning.style.display = 'none';
+            primaryHelpText.style.display = 'block';
+        }
+    }
+
+    // Call on page load
+    initializePrimaryCheckbox();
+
+    // Click to upload
+    uploadZone.addEventListener('click', (e) => {
+        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+            fileInput.click();
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+        handleFile(e.target.files[0]);
+    });
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('drag-over');
+    });
+
+    uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('drag-over');
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('drag-over');
+
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            handleFile(file);
+        }
+    });
+
+    function handleFile(file) {
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file');
+            return;
+        }
+
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+        if (!validTypes.includes(file.type)) {
+            alert('Only JPG, PNG, and WEBP formats are allowed');
+            fileInput.value = '';
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Image size must be less than 5MB');
+            fileInput.value = '';
+            return;
+        }
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+            imagePreviewContainer.style.display = 'block';
+            uploadBtn.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function clearImage() {
+        fileInput.value = '';
+        imagePreview.innerHTML = '';
+        imagePreviewContainer.style.display = 'none';
+        uploadBtn.disabled = true;
+        primaryCheckbox.checked = false;
+    }
+
+    // Prevent clicking disabled checkbox label
+    primaryLabel.addEventListener('click', (e) => {
+        if (primaryCheckbox.disabled) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+{% endblock content %}

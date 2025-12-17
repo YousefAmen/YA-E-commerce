@@ -1,0 +1,644 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="add-product-container">
+    <div class="container py-5">
+        <!-- Back Button -->
+        <div class="mb-4">
+            <a href="javascript:history.back()" class="btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="text-center mb-5">
+            <div class="category-badge mb-3">
+                <i class="fas fa-boxes me-2"></i>
+                Inventory Management
+            </div>
+            <h1 class="page-title mb-2">Set Up Inventory</h1>
+            <p class="page-subtitle">Final step - configure stock and availability</p>
+        </div>
+
+        <!-- Progress Indicator - 5 Steps -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="steps-container">
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Category</p>
+                    </div>
+
+                    <div class="step-line step-line-complete"></div>
+
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Subcategory</p>
+                    </div>
+
+                    <div class="step-line step-line-complete"></div>
+
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Product Details</p>
+                    </div>
+
+                    <div class="step-line step-line-complete"></div>
+
+                    <div class="step-item step-complete">
+                        <div class="step-circle">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p class="step-label">Upload Images</p>
+                    </div>
+
+                    <div class="step-line step-line-complete"></div>
+
+                    <div class="step-item step-active">
+                        <div class="step-circle">
+                            <strong>5</strong>
+                        </div>
+                        <p class="step-label">Inventory</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert" role="alert">
+            <i
+                class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <!-- Form Card -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="form-card">
+                    <form method="POST" id="inventoryForm">
+                        {% csrf_token %}
+
+                        <div class="form-sections">
+                            <!-- Stock Quantity -->
+                            <div class="inventory-section">
+                                <div class="section-icon-wrapper">
+                                    <div class="section-icon">
+                                        <i class="fas fa-warehouse"></i>
+                                    </div>
+                                </div>
+                                <div class="section-content">
+                                    <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                        <i class="fas fa-cubes me-2"></i>Stock Quantity
+                                    </label>
+                                    <div class="quantity-control">
+                                        <button type="button" class="qty-btn" onclick="decrementQty()">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        {{ form.quantity }}
+                                        <button type="button" class="qty-btn" onclick="incrementQty()">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    {% if form.quantity.errors %}
+                                    <div class="text-danger mt-2">
+                                        {% for error in form.quantity.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text">Total units available for sale</small>
+                                </div>
+                            </div>
+
+                            <!-- Summary Card -->
+                            <div class="summary-card">
+                                <h4 class="summary-title">
+                                    <i class="fas fa-clipboard-check me-2"></i>Inventory Summary
+                                </h4>
+                                <div class="summary-grid">
+                                    <div class="summary-item">
+                                        <div class="summary-icon">
+                                            <i class="fas fa-boxes"></i>
+                                        </div>
+                                        <div>
+                                            <p class="summary-label">Total Stock</p>
+                                            <p class="summary-value" id="summaryQty">10 units</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="form-actions">
+                            <a href="javascript:history.back()" class="btn-cancel">
+                                <i class="fas fa-arrow-left me-2"></i>Previous Step
+                            </a>
+                            <button type="submit" class="btn-submit btn-finish">
+                                <i class="fas fa-check-circle me-2"></i>Finish & Publish Product
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Help Card -->
+                <div class="help-card mt-4">
+                    <div class="d-flex align-items-start">
+                        <div class="help-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="help-title">Inventory Tips</h5>
+                            <ul class="help-list">
+                                <li>Keep your stock levels updated to avoid overselling</li>
+                                <li>You can update inventory anytime from your dashboard</li>
+                                <li>Make sure to enter accurate quantities</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .add-product-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding-bottom: 50px;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.5rem 1.25rem;
+        background: white;
+        color: #4a5568;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-back:hover {
+        background: #2d3748;
+        color: white;
+        transform: translateX(-5px);
+    }
+
+    .category-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .page-title {
+        color: #2d3748;
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    .page-subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    /* Steps */
+    .steps-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .step-complete .step-circle {
+        background: #48bb78;
+        color: white;
+        box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+    }
+
+    .step-active .step-circle {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 4px 25px rgba(102, 126, 234, 0.6);
+        }
+    }
+
+    .step-label {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .step-complete .step-label {
+        color: #48bb78;
+    }
+
+    .step-active .step-label {
+        color: #667eea;
+    }
+
+    .step-line {
+        flex: 1;
+        height: 3px;
+        margin: 0 10px;
+        margin-bottom: 50px;
+    }
+
+    .step-line-complete {
+        background: #48bb78;
+    }
+
+    .custom-alert {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .form-sections {
+        padding: 3rem;
+    }
+
+    .inventory-section {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 3rem;
+        padding-bottom: 3rem;
+        border-bottom: 2px solid #f7fafc;
+    }
+
+    .inventory-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .section-icon-wrapper {
+        flex-shrink: 0;
+    }
+
+    .section-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .section-icon i {
+        color: white;
+        font-size: 2rem;
+    }
+
+    .section-content {
+        flex: 1;
+    }
+
+    .form-label {
+        font-weight: 700;
+        color: #2d3748;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .form-text {
+        color: #718096;
+        font-size: 0.875rem;
+        display: block;
+        margin-top: 0.75rem;
+    }
+
+    /* Quantity Control */
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        max-width: 300px;
+    }
+
+    .qty-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        border: 2px solid #e2e8f0;
+        background: white;
+        color: #667eea;
+        font-size: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qty-btn:hover {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+        transform: scale(1.05);
+    }
+
+    /* Style the Django form field */
+    #id_quantity {
+        flex: 1;
+        text-align: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        height: 60px;
+        color: #2d3748;
+        width: 100%;
+    }
+
+    #id_quantity:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    /* Summary Card */
+    .summary-card {
+        background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+    }
+
+    .summary-title {
+        color: #2d3748;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .summary-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.25rem;
+    }
+
+    .summary-label {
+        color: #718096;
+        font-size: 0.875rem;
+        margin: 0;
+    }
+
+    .summary-value {
+        color: #2d3748;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2rem 2.5rem;
+        background: #f7fafc;
+        border-top: 2px solid #e2e8f0;
+    }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.875rem 2rem;
+        background: white;
+        color: #4a5568;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid #e2e8f0;
+    }
+
+    .btn-cancel:hover {
+        background: #2d3748;
+        color: white;
+        border-color: #2d3748;
+        transform: translateY(-2px);
+    }
+
+    .btn-submit {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.875rem 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-finish {
+        background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        box-shadow: 0 4px 15px rgba(72, 187, 120, 0.3);
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    }
+
+    .help-card {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        color: white;
+    }
+
+    .help-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        background: rgba(102, 126, 234, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .help-icon i {
+        color: #f6ad55;
+        font-size: 1.5rem;
+    }
+
+    .help-title {
+        color: white;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .help-list {
+        margin: 0;
+        padding-left: 1.5rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .help-list li {
+        margin-bottom: 0.5rem;
+    }
+
+    @media (max-width: 992px) {
+        .steps-container {
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .inventory-section {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-sections {
+            padding: 1.5rem;
+        }
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<script>
+    function incrementQty() {
+        const input = document.getElementById('id_quantity');
+        input.value = parseInt(input.value || 0) + 1;
+        updateSummary();
+    }
+
+    function decrementQty() {
+        const input = document.getElementById('id_quantity');
+        const currentValue = parseInt(input.value || 0);
+        if (currentValue > 0) {
+            input.value = currentValue - 1;
+            updateSummary();
+        }
+    }
+
+    function updateSummary() {
+        const qty = document.getElementById('id_quantity').value || 0;
+        document.getElementById('summaryQty').textContent = qty + ' units';
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function () {
+        const qtyInput = document.getElementById('id_quantity');
+        if (qtyInput) {
+            // Set initial value if empty
+            if (!qtyInput.value) {
+                qtyInput.value = 10;
+            }
+            // Update summary on input change
+            qtyInput.addEventListener('input', updateSummary);
+            // Initialize summary
+            updateSummary();
+        }
+    });
+</script>
+{% endblock content %}

@@ -1,32 +1,20 @@
 from django.contrib import admin
-from .models import *
-from django.contrib.auth.models import User
-from members.models import Profile
-
-# Register your models here.
-admin.site.site_header = 'Y-A-A'
-admin.site.register(Category)
-admin.site.register(Contact_Us)
-admin.site.register(Profile)
-admin.site.register(Product)
+from . import models
+from members.models import User
 
 
-# mix the profile informaiton and user information
-class ProfileInline(admin.StackedInline):
-  model = Profile
+admin.site.site_header = "Y-A-A"
 
-# extends the User model
+
 class UserAdmin(admin.ModelAdmin):
-  model = User
-  field = ['username','first_name','last_name','email']
-  inlines =[ProfileInline]
+    pass
 
 
-
-# unregister the old way
-admin.site.unregister(User)
-
-# re-register the new way
-admin.site.register(User,UserAdmin)
-
-
+admin.site.register(models.Category)
+admin.site.register(models.Contact)
+admin.site.register(models.Product)
+admin.site.register(models.Inventory)
+admin.site.register(models.ProductImage)
+admin.site.register(models.Laptop)
+admin.site.register(models.Phone)
+admin.site.register(models.Book)

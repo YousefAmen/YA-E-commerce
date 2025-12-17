@@ -1,0 +1,183 @@
+  .profile-wrapper {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    padding: 60px 0;
+  }
+
+  .profile-header {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    border-radius: 15px 15px 0 0;
+    padding: 50px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc3545, #007bff, #28a745);
+  }
+
+  .profile-avatar {
+    width: 150px;
+    height: 150px;
+    border: 5px solid #fff;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    object-fit: cover;
+  }
+
+  .role-badge {
+    display: inline-block;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+  }
+
+  .role-merchant {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+
+  .role-customer {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+  }
+
+  .info-card {
+    border: none;
+    border-radius: 0 0 15px 15px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .info-row {
+    padding: 18px 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.3s ease;
+  }
+
+  .info-row:hover {
+    background: #f8f9fa;
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    font-weight: 600;
+    color: #495057;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .info-label i {
+    color: #6c757d;
+    width: 20px;
+    text-align: center;
+  }
+
+  .info-value {
+    color: #212529;
+    font-weight: 500;
+  }
+  .action-buttons {
+  background: #f8f9fa;
+  padding: 30px 25px;
+  border-radius: 0 0 15px 15px;
+  display: flex; 
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+  .btn-action {
+  padding: 14px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px solid transparent;
+  text-decoration: none;
+  font-size: 0.9rem;
+  flex: 0 0 auto; 
+  }
+
+
+  .btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-update {
+    background: #007bff;
+    color: white;
+  }
+
+  .btn-update:hover {
+    background: #0056b3;
+    color: white;
+  }
+
+  .btn-logout {
+    background: white;
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .btn-logout:hover {
+    background: #dc3545;
+    color: white;
+    border-color: #dc3545;
+  }
+
+  .btn-favourites {
+    background: white;
+    color: #e83e8c;
+    border-color: #e83e8c;
+  }
+
+  .btn-favourites:hover {
+    background: #e83e8c;
+    color: white;
+    border-color: #e83e8c;
+  }
+
+  .joined-badge {
+    background: #e9ecef;
+    padding: 10px 20px;
+    border-radius: 8px;
+    display: inline-block;
+    margin-top: 10px;
+  }
+
+  @media (max-width: 768px) {
+    .profile-wrapper {
+      padding: 30px 0;
+    }
+
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .btn-action {
+      width: 100%;
+      justify-content: center;
+    }
+  }

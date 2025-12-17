@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <!-- Back Button -->
+            <div class="mb-3">
+                <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </a>
+            </div>
+
+            <!-- Publish Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="publish-icon mb-3">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <h2 class="mb-2">Ready to Publish?</h2>
+                        <p class="text-muted">Review your product details before publishing</p>
+                    </div>
+
+                    <!-- Product Summary -->
+                    <div class="product-summary p-3 mb-4">
+                        <h5 class="mb-3"><i class="fas fa-box mr-2"></i>Product Details</h5>
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Product Name</small>
+                                <strong>{{ product.name }}</strong>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Category</small>
+                                <strong>{{ product.category.name }}</strong>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Price</small>
+                                <strong>${{ product.price }}</strong>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <small class="text-muted d-block">Stock</small>
+                                <strong>{{ product.inventory.quantity }} units</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Messages -->
+                    {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+
+                    <!-- Publish Form -->
+                    <form method="POST">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label class="font-weight-bold">
+                                <i class="fas fa-toggle-on mr-2"></i>Publish Status
+                            </label>
+                            <div class="custom-control custom-radio mb-2">
+                                <input type="radio" id="publishYes" name="is_published" value="true"
+                                    class="custom-control-input" checked>
+                                <label class="custom-control-label" for="publishYes">
+                                    <strong>Publish Now</strong>
+                                    <small class="d-block text-muted">Make product visible to customers
+                                        immediately</small>
+                                </label>
+                            </div>
+
+                            <div class="custom-control custom-radio">
+                                <input type="radio" id="publishNo" name="is_published" value="false"
+                                    class="custom-control-input">
+                                <label class="custom-control-label" for="publishNo">
+                                    <strong>Save as Draft</strong>
+                                    <small class="d-block text-muted">Keep product hidden until you're ready</small>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <small>You can change the publish status anytime from your dashboard</small>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check mr-2"></i>Confirm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="text-center mt-3">
+                <small class="text-muted">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Your product information is secure and can be edited later
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .publish-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .publish-icon i {
+        font-size: 2rem;
+        color: white;
+    }
+
+    .product-summary {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #e9ecef;
+    }
+
+    .custom-control-label {
+        cursor: pointer;
+    }
+
+    .custom-control-input:checked~.custom-control-label {
+        color: #667eea;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.5rem 2rem;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #63408a 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .card {
+        border-radius: 12px;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/choosing_category.css' %}">
+{% endblock %}
+
+<div class="container py-5">
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-3" style="color: #2d3748; font-size: 2.5rem;">Add New Product</h1>
+        <p class="text-muted fs-6">Select the main category for your product</p>
+    </div>
+
+    <!-- Progress Indicator - 5 Steps -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="steps-container">
+                <!-- Step 1 - Active -->
+                <div class="step-item step-active">
+                    <div class="step-circle">
+                        <strong>1</strong>
+                    </div>
+                    <p class="step-label">Category</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 2 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>2</strong>
+                    </div>
+                    <p class="step-label">Subcategory</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 3 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>3</strong>
+                    </div>
+                    <p class="step-label">Product Details</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 4 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>4</strong>
+                    </div>
+                    <p class="step-label">Upload Images</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 5 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>5</strong>
+                    </div>
+                    <p class="step-label">Inventory</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Category Grid -->
+    <div class="row g-4">
+        {% for category in categories %}
+        {% if not category.parent %}
+        <div class="col-md-6 col-lg-3">
+            <form method="POST" action="{% url 'choosing_product_category' %}">
+                {% csrf_token %}
+                <input type="hidden" name="category_slug" value="{{ category.slug }}">
+
+                <button type="submit" class="btn w-100 p-0 border-0 category-btn">
+                    <div class="category-card">
+                        <div class="category-icon-wrapper">
+                            <i class="fas {{ category.icon|default:'fa-box' }} fa-3x"></i>
+                        </div>
+                        <h5 class="category-title">{{ category.name }}</h5>
+                        <p class="category-count">
+                            {{ category.children.count }} subcategories
+                        </p>
+                        <div class="category-arrow">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                    </div>
+                </button>
+            </form>
+        </div>
+        {% endif %}
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                No categories available. Please contact the administrator.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+{% endblock %}

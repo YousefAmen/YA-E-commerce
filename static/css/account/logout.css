@@ -1,0 +1,22 @@
+    .logout-header {
+        background: #2d2d2d;
+    }
+
+    .logout-icon {
+        width: 80px;
+        height: 80px;
+        background: #3d3d3d;
+        margin: 0 auto 20px;
+        color: #dc3545;
+    }
+
+    .btn-logout:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+    }

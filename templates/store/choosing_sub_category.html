@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/choosing_sub_category.css' %}">
+{% endblock %}
+<div class="container py-5">
+    <!-- Back Button -->
+    <div class="mb-4">
+        <a href="{% url 'choosing_product_category' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back
+        </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold mb-2" style="color: #2d3748; font-size: 2.5rem;">Choose Product Type</h1>
+        <p class="text-muted fs-6">
+            Category: <span class="fw-bold" style="color: #667eea;">{{ main_category.name }}</span>
+        </p>
+    </div>
+
+    <!-- Progress Indicator - 5 Steps -->
+    <div class="row justify-content-center mb-5">
+        <div class="col-lg-10">
+            <div class="steps-container">
+                <!-- Step 1 - Complete -->
+                <div class="step-item step-complete">
+                    <div class="step-circle">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <p class="step-label">Category</p>
+                </div>
+
+                <div class="step-line step-line-complete"></div>
+
+                <!-- Step 2 - Active -->
+                <div class="step-item step-active">
+                    <div class="step-circle">
+                        <strong>2</strong>
+                    </div>
+                    <p class="step-label">Subcategory</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 3 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>3</strong>
+                    </div>
+                    <p class="step-label">Product Details</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 4 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>4</strong>
+                    </div>
+                    <p class="step-label">Upload Images</p>
+                </div>
+
+                <div class="step-line step-line-inactive"></div>
+
+                <!-- Step 5 - Inactive -->
+                <div class="step-item step-inactive">
+                    <div class="step-circle">
+                        <strong>5</strong>
+                    </div>
+                    <p class="step-label">Inventory</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>{{ error }}
+    </div>
+    {% endif %}
+
+    <!-- Subcategory List -->
+    <div class="row g-4">
+        {% for subcategory in subcategories %}
+        <div class="col-md-6 col-lg-4">
+            <form method="POST" action="{% url 'choosing_sub_category' category_slug=main_category.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="subcategory_slug" value="{{ subcategory.slug }}">
+
+                <button type="submit" class="btn w-100 p-0 border-0 subcategory-btn">
+                    <div class="subcategory-card">
+                        <div class="d-flex align-items-center">
+                            <div class="subcategory-icon">
+                                <i class="fas {{ subcategory.icon|default:'fa-tag' }} fa-2x"></i>
+                            </div>
+                            <div class="flex-grow-1 text-start ms-3">
+                                <h5 class="subcategory-title mb-1">{{ subcategory.name }}</h5>
+                                {% if subcategory.model_name %}
+                                <span class="badge-ready">
+                                    <i class="fas fa-check-circle me-1"></i>Ready
+                                </span>
+                                {% else %}
+                                <span class="badge-soon">
+                                    <i class="fas fa-clock me-1"></i>Coming Soon
+                                </span>
+                                {% endif %}
+                            </div>
+                            <div class="subcategory-chevron">
+                                <i class="fas fa-chevron-right"></i>
+                            </div>
+                        </div>
+                    </div>
+                </button>
+            </form>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle me-2"></i>
+                No subcategories available for <strong>{{ main_category.name }}</strong>.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+
+{% endblock %}

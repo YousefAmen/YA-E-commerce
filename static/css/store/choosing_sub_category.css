@@ -1,0 +1,268 @@
+    .subcategory-btn {
+        text-align: left;
+        background: none;
+    }
+
+    .subcategory-card {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .subcategory-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+    }
+
+    .subcategory-card:hover::before {
+        opacity: 0.95;
+    }
+
+    .subcategory-card:hover {
+        transform: translateX(8px);
+        border-color: #667eea;
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.25);
+    }
+
+    .subcategory-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: rgba(102, 126, 234, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .subcategory-card:hover .subcategory-icon {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+    }
+
+    .subcategory-icon i {
+        color: #667eea;
+        transition: color 0.3s ease;
+    }
+
+    .subcategory-card:hover .subcategory-icon i {
+        color: white;
+    }
+
+    .subcategory-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.15rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .badge-ready {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        background: rgba(72, 187, 120, 0.2);
+        color: #68d391;
+        font-size: 0.75rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .subcategory-card:hover .badge-ready {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .badge-soon {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        background: rgba(237, 137, 54, 0.2);
+        color: #f6ad55;
+        font-size: 0.75rem;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    .subcategory-card:hover .badge-soon {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .subcategory-chevron {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: rgba(102, 126, 234, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+
+    .subcategory-card:hover .subcategory-chevron {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateX(5px);
+    }
+
+    .subcategory-chevron i {
+        color: #667eea;
+        font-size: 0.875rem;
+        transition: color 0.3s ease;
+    }
+
+    .subcategory-card:hover .subcategory-chevron i {
+        color: white;
+    }
+
+    /* 5-Step Progress Indicator */
+    .steps-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .step-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    .step-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .step-complete .step-circle {
+        background: #48bb78;
+        color: white;
+        box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
+    }
+
+    .step-active .step-circle {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        animation: pulse 2s infinite;
+    }
+
+    .step-inactive .step-circle {
+        background: white;
+        border: 3px solid #e2e8f0;
+        color: #a0aec0;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        50% {
+            box-shadow: 0 4px 25px rgba(102, 126, 234, 0.6);
+        }
+    }
+
+    .step-label {
+        margin: 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .step-complete .step-label {
+        color: #48bb78;
+    }
+
+    .step-active .step-label {
+        color: #667eea;
+    }
+
+    .step-inactive .step-label {
+        color: #a0aec0;
+    }
+
+    .step-line {
+        flex: 1;
+        height: 3px;
+        margin: 0 10px;
+        margin-bottom: 50px;
+    }
+
+    .step-line-complete {
+        background: #48bb78;
+    }
+
+    .step-line-inactive {
+        background: #e2e8f0;
+    }
+
+    @media (max-width: 992px) {
+        .steps-container {
+            overflow-x: auto;
+            padding-bottom: 20px;
+        }
+
+        .step-label {
+            font-size: 0.75rem;
+            max-width: 80px;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            font-size: 0.875rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .subcategory-card {
+            padding: 1.25rem;
+        }
+
+        .subcategory-icon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .subcategory-icon i {
+            font-size: 1.5rem;
+        }
+
+        .subcategory-title {
+            font-size: 1rem;
+        }
+    }

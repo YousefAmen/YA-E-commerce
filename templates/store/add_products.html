@@ -1,16 +1,152 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
 {% block content %}
-{% for message in messages %}
-<div class="alert alert-{{ message.tags }}" role="alert">
-  {{ message }}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/add_products.css' %}">
+{% endblock %}
+<div class="add-product-container">
+  <div class="container py-5">
+    <!-- Back Button -->
+    <div class="mb-4">
+      <a href="{% url 'choosing_sub_category' category_slug=sub_category_obj.parent.slug %}" class="btn-back">
+        <i class="fas fa-arrow-left me-2"></i>Back to Categories
+      </a>
+    </div>
+
+    <!-- Page Header -->
+    <div class="text-center mb-5">
+      <div class="category-badge mb-3">
+        <i class="fas {{ sub_category_obj.icon|default:'fa-tag' }} me-2"></i>
+        {{ sub_category_obj.name }}
+      </div>
+      <h1 class="page-title mb-2">Add New Product</h1>
+      <p class="page-subtitle">Fill in the details below to list your {{ sub_category_obj.name|lower }}</p>
+    </div>
+
+    <!-- Progress Indicator - 5 Steps -->
+    <div class="row justify-content-center mb-5">
+      <div class="col-lg-10">
+        <div class="steps-container">
+          <!-- Step 1 - Complete -->
+          <div class="step-item step-complete">
+            <div class="step-circle">
+              <i class="fas fa-check"></i>
+            </div>
+            <p class="step-label">Category</p>
+          </div>
+
+          <div class="step-line step-line-complete"></div>
+
+          <!-- Step 2 - Complete -->
+          <div class="step-item step-complete">
+            <div class="step-circle">
+              <i class="fas fa-check"></i>
+            </div>
+            <p class="step-label">Subcategory</p>
+          </div>
+
+          <div class="step-line step-line-complete"></div>
+
+          <!-- Step 3 - Active -->
+          <div class="step-item step-active">
+            <div class="step-circle">
+              <strong>3</strong>
+            </div>
+            <p class="step-label">Product Details</p>
+          </div>
+
+          <div class="step-line step-line-inactive"></div>
+
+          <!-- Step 4 - Inactive -->
+          <div class="step-item step-inactive">
+            <div class="step-circle">
+              <strong>4</strong>
+            </div>
+            <p class="step-label">Upload Images</p>
+          </div>
+
+          <div class="step-line step-line-inactive"></div>
+
+          <!-- Step 5 - Inactive -->
+          <div class="step-item step-inactive">
+            <div class="step-circle">
+              <strong>5</strong>
+            </div>
+            <p class="step-label">Inventory</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show custom-alert" role="alert">
+      <i
+        class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="form-card">
+          <form method="POST" id="productForm">
+            {% csrf_token %}
+
+            <div class="form-sections">
+              <!-- Product Details Section -->
+              <div class="form-section">
+                <div class="section-header">
+                  <div class="section-icon">
+                    <i class="fas fa-info-circle"></i>
+                  </div>
+                  <div>
+                    <h3 class="section-title">Product Information</h3>
+                    <p class="section-subtitle">Enter the essential details about your product</p>
+                  </div>
+                </div>
+                <div class="section-content">
+                  {{ form|crispy }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions">
+              <a href="{% url 'choosing_sub_category' category_slug=sub_category_obj.parent.slug %}" class="btn-cancel">
+                <i class="fas fa-times me-2"></i>Cancel
+              </a>
+              <button type="submit" class="btn-submit">
+                Continue to Images <i class="fas fa-arrow-right ms-2"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Help Card -->
+        <div class="help-card mt-4">
+          <div class="d-flex align-items-start">
+            <div class="help-icon">
+              <i class="fas fa-lightbulb"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h5 class="help-title">Tips for Product Details</h5>
+              <ul class="help-list">
+                <li>Write a clear, descriptive product name</li>
+                <li>Include detailed specifications and features</li>
+                <li>Set a competitive price based on market research</li>
+                <li>Mention condition (new/used) and warranty if applicable</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-{%endfor%}
-<form method="POST" class="mb-center" style="margin: 50px;" enctype="multipart/form-data">
-  {%csrf_token%}
-  {{forms.as_p}}
-  <button type="submit" class="btn btn-dark">
-    Add Product
-  </button>
-</form>
 
 {% endblock content %}

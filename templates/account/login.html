@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/account/login.css' %}">
+{% endblock %}
+<div class="login-wrapper">
+  <div class="container login-container">
+    <div class="row g-0 login-card">
+
+      <!-- Left Side - Marketing Content -->
+      <div class="col-lg-5 d-none d-lg-block">
+        <div class="login-left">
+          <div class="login-icon">
+            <i class="fas fa-shopping-bag"></i>
+          </div>
+
+          <h1>Welcome to YA E-commerce</h1>
+
+          <p>The Best Online Shopping Experience in The World</p>
+
+          <p>Don't miss out on this amazing opportunity! Join thousands of satisfied customers who trust YA E-commerce
+            for their shopping needs.</p>
+
+          <ul class="feature-list">
+            <li>
+              <i class="fas fa-check-circle"></i>
+              <span>Exclusive Deals & Discounts</span>
+            </li>
+            <li>
+              <i class="fas fa-check-circle"></i>
+              <span>Fast & Secure Delivery</span>
+            </li>
+            <li>
+              <i class="fas fa-check-circle"></i>
+              <span>24/7 Customer Support</span>
+            </li>
+            <li>
+              <i class="fas fa-check-circle"></i>
+              <span>Easy Returns & Refunds</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Right Side - Login Form -->
+      <div class="col-lg-7">
+        <div class="login-right">
+
+          <!-- Header -->
+          <div class="login-header">
+            <h2>Login to Your Account</h2>
+            <p>Welcome back! Please enter your credentials</p>
+          </div>
+
+          <!-- Messages -->
+          {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            <i class="fas fa-info-circle me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+
+          <!-- Login Form -->
+          <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <button type="submit" class="btn btn-login">
+              <i class="fas fa-sign-in-alt me-2"></i>Login Now
+            </button>
+          </form>
+
+          <!-- Divider -->
+          <div class="divider">
+            <span>or continue with</span>
+          </div>
+
+          <!-- Social Login Buttons -->
+          <div class="social-login">
+            <a href="{% url 'google_login' %}" class="btn btn-social">
+              <i class="fab fa-google"></i> Google
+            </a>
+            <a href="{% url 'facebook_login' %}" class="btn btn-social">
+              <i class="fab fa-facebook-f"></i> Facebook
+            </a>
+          </div>
+
+          <!-- Sign Up Link -->
+          <div class="signup-link">
+            Don't have an account? <a href="{% url 'account_signup' %}">Sign up now!</a>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/account/merchant_analyzes.css' %}">
+{% endblock %}
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container">
+        <h1><i class="fas fa-store"></i>{{merchant.business_name}}</h1>
+        <p>Track your store performance and insights</p>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Stats Cards Row 1 -->
+    <div class="row">
+        <!-- Total Orders -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card purple">
+                <div class="icon-wrapper">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <h3>Total Orders</h3>
+                <div class="value">{{ orders_count|default:"0" }}</div>
+                <div class="subtitle">
+                    <i class="fas fa-arrow-up"></i> All time orders
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card green">
+                <div class="icon-wrapper">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <h3>Total Revenue</h3>
+                <div class="value">${{ total_revenue|default:"0"|floatformat:2 }}</div>
+                <div class="subtitle">
+                    <i class="fas fa-money-bill-wave"></i> Total earnings
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Views -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card teal">
+                <div class="icon-wrapper">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3>Product Views</h3>
+                <div class="value">{{ product_views_count|default:"0" }}</div>
+                <div class="subtitle">
+                    <i class="fas fa-chart-line"></i> Total impressions
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Visitors -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card pink">
+                <div class="icon-wrapper">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Total Visitors</h3>
+                <div class="value">{{ total_visitors|default:"0" }}</div>
+                <div class="subtitle">
+                    <i class="fas fa-user-check"></i> All visitors
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards Row 2 -->
+    <div class="row">
+        <!-- Merchant Visitors -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card blue">
+                <div class="icon-wrapper">
+                    <i class="fas fa-store-alt"></i>
+                </div>
+                <h3>Merchant Visitors</h3>
+                <div class="value">{{ merchant.visitor_count|default:"0" }}</div>
+                <div class="subtitle">
+                    <i class="fas fa-eye"></i> Profile views
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Rate -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card purple">
+                <div class="icon-wrapper">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <h3>Conversion Rate</h3>
+                <div class="value">
+                    {% if total_visitors and total_visitors > 0 %}
+                    {% widthratio orders_count total_visitors 100 %}%
+                    {% else %}
+                    0%
+                    {% endif %}
+                </div>
+                <div class="subtitle">
+                    <i class="fas fa-chart-pie"></i> Orders / Visitors
+                </div>
+            </div>
+        </div>
+
+        <!-- Avg Order Value -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card teal">
+                <div class="icon-wrapper">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <h3>Avg Order Value</h3>
+                <div class="value">
+                    ${{avg_value_orders|floatformat:2}}
+                </div>
+                <div class="subtitle">
+                    <i class="fas fa-calculator"></i> Per order
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Growth Rate -->
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card {% if growth_rate >= 0 %}green{% else %}orange{% endif %}">
+                <div class="icon-wrapper">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3>Overall Growth</h3>
+                <div class="value">
+                    <i class="fas fa-arrow-{% if growth_rate >= 0 %}up{% else %}down{% endif %}"></i>
+                    {{ growth_rate|default:"0" }}%
+                </div>
+                <div class="subtitle">
+                    <i class="fas fa-trending-up"></i> This month vs last
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Most Viewed Products - Full Width -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="info-section">
+                <h2><i class="fas fa-fire"></i> Most Viewed Products</h2>
+                {% if most_product_views %}
+                <div class="row">
+                    {% for product in most_product_views %}
+                    <div class="col-lg-6 col-md-6 mb-3">
+                        <div class="product-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5>{{ product.name|default:"Product Name" }}</h5>
+                                    <div class="views">
+                                        <i class="fas fa-eye"></i> {{ product.most_views|default:"0" }} views
+                                    </div>
+                                </div>
+                                <div>
+                                    <span class="badge text-success badge-pill px-3 py-2 ">
+                                        ${{ product.price|default:"0"|floatformat:2 }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-muted py-5">
+                    <i class="fas fa-box-open fa-3x mb-3"></i>
+                    <p>No product views yet</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Comparison Section -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="info-section">
+                <h2><i class="fas fa-calendar-alt"></i> Monthly Performance Comparison</h2>
+
+                <div class="row">
+                    <!-- This Month Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stat-card blue">
+                            <h3><i class="fas fa-calendar-day"></i> This Month</h3>
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <div class="subtitle">Orders</div>
+                                    <div class="value" style="font-size: 2rem;">
+                                        {{ this_month_orders_count|default:"0"}}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="subtitle">Revenue</div>
+                                    <div class="value" style="font-size: 2rem;">
+                                        ${{this_month_revenue|default:"0"|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+                            <div class="subtitle">
+                                <i class="fas fa-chart-line"></i> Current month performance
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Last Month Card -->
+                    <div class="col-lg-6 mb-4">
+                        <div class="stat-card purple">
+                            <h3><i class="fas fa-calendar-minus"></i> Last Month</h3>
+                            <div class="row mt-4">
+                                <div class="col-6">
+                                    <div class="subtitle">Orders</div>
+                                    <div class="value" style="font-size: 2rem;">
+                                        {{ last_month_orders_count|default:"0"}}</div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="subtitle">Revenue</div>
+                                    <div class="value" style="font-size: 2rem;">
+                                        ${{last_month_revenue|default:"0"|floatformat:2 }}</div>
+                                </div>
+                            </div>
+                            <hr style="border-color: rgba(255,255,255,0.2); margin: 20px 0;">
+                            <div class="subtitle">
+                                <i class="fas fa-history"></i> Previous month performance
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Growth Metrics Row -->
+                <div class="row">
+                    <div class="col-lg-4 mb-3">
+                        <div class="visitor-stat text-center">
+                            <h4>
+                                <i
+                                    class="fas fa-dollar-sign {% if growth_revenue >= 0 %}text-success{% else %}text-danger{% endif %}"></i>
+                                Revenue Growth
+                            </h4>
+                            <div class="count {% if growth_revenue >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                <i class="fas fa-arrow-{% if growth_revenue >= 0 %}up{% else %}down{% endif %}"></i>
+                                {{ growth_revenue|default:"0" }}%
+                            </div>
+                            <div class="percentage">This month vs last month</div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-3">
+                        <div class="visitor-stat text-center">
+                            <h4>
+                                <i
+                                    class="fas fa-shopping-bag {% if order_growth >= 0 %}text-success{% else %}text-danger{% endif %}"></i>
+                                Order Growth
+                            </h4>
+                            <div class="count {% if order_growth >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                <i class="fas fa-arrow-{% if order_growth >= 0 %}up{% else %}down{% endif %}"></i>
+                                {{ order_growth|default:"0" }}%
+                            </div>
+                            <div class="percentage">Order count comparison</div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 mb-3">
+                        <div class="visitor-stat text-center">
+                            <h4>
+                                <i
+                                    class="fas fa-chart-line {% if growth_rate >= 0 %}text-success{% else %}text-danger{% endif %}"></i>
+                                Overall Growth
+                            </h4>
+                            <div class="count {% if growth_rate >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                <i class="fas fa-arrow-{% if growth_rate >= 0 %}up{% else %}down{% endif %}"></i>
+                                {{ growth_rate|default:"0" }}%
+                            </div>
+                            <div class="percentage">Average growth rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="chart-container">
+                <h2 class="mb-4"><i class="fas fa-chart-bar"></i> Quick Performance Stats</h2>
+
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="font-weight-bold">Orders</span>
+                            <span class="text-muted">{{ orders_count|default:"0" }}</span>
+                        </div>
+                        <div class="progress progress-custom">
+                            {% if orders_count > 0 %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 75%"></div>
+                            {% else %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 0%"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="font-weight-bold">Views</span>
+                            <span class="text-muted">{{ product_views_count|default:"0" }}</span>
+                        </div>
+                        <div class="progress progress-custom">
+                            {% if product_views_count > 0 %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 90%"></div>
+                            {% else %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 0%"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="font-weight-bold">Revenue</span>
+                            <span class="text-muted">${{ total_revenue|default:"0"|floatformat:2 }}</span>
+                        </div>
+                        <div class="progress progress-custom">
+                            {% if total_revenue > 0 %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 85%"></div>
+                            {% else %}
+                            <div class="progress-bar progress-bar-custom" role="progressbar" style="width: 0%"></div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,487 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .stats-card {
+        background: #2d3748;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease;
+        color: white;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .icon-purple {
+        background: linear-gradient(135deg, #7c6fd6 0%, #a78bfa 100%);
+    }
+
+    .icon-green {
+        background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+    }
+
+    .icon-cyan {
+        background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+    }
+
+    .icon-orange {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+    }
+
+    .stat-label {
+        font-size: 0.875rem;
+        color: #cbd5e0;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: white;
+        margin: 0;
+    }
+
+    .order-card {
+        background: #2d3748;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .order-header {
+        background: #374151;
+        padding: 1.25rem;
+        border-bottom: 2px solid #4a5568;
+    }
+
+    .order-body {
+        padding: 1.5rem;
+    }
+
+    .order-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: white;
+        margin: 0;
+    }
+
+    .order-date {
+        font-size: 0.875rem;
+        color: #cbd5e0;
+        margin-top: 0.25rem;
+    }
+
+    .product-item {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: #374151;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .product-image {
+        width: 60px;
+        height: 60px;
+        border-radius: 8px;
+        object-fit: cover;
+        margin-right: 1rem;
+        background: #4a5568;
+    }
+
+    .product-info {
+        flex: 1;
+    }
+
+    .product-name {
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.25rem;
+    }
+
+    .product-quantity {
+        font-size: 0.875rem;
+        color: #cbd5e0;
+    }
+
+    .product-price {
+        font-weight: 700;
+        color: #4ade80;
+        font-size: 1.1rem;
+    }
+
+    .badge-pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .badge-confirmed {
+        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .badge-processing {
+        background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .badge-shipped {
+        background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .badge-delivered {
+        background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .badge-cancelled {
+        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+        color: white;
+        padding: 0.4rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        display: inline-block;
+    }
+
+    .btn-view-order {
+        background: linear-gradient(135deg, #7c6fd6 0%, #a78bfa 100%);
+        color: white;
+        border: none;
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-view-order:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(124, 111, 214, 0.3);
+        color: white;
+    }
+
+    .btn-track-order {
+        background: linear-gradient(135deg, #14b8a6 0%, #2dd4bf 100%);
+        color: white;
+        border: none;
+        padding: 0.625rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-track-order:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+        color: white;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+        padding: 2rem 0;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        color: #64748b;
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .order-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: #374151;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+
+    .order-total-label {
+        font-weight: 600;
+        color: #cbd5e0;
+    }
+
+    .order-total-value {
+        font-weight: 700;
+        color: #4ade80;
+        font-size: 1.25rem;
+    }
+
+    .empty-state {
+        background: #2d3748;
+        border-radius: 12px;
+        padding: 4rem 2rem;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        color: white;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #64748b;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-shop-now {
+        background: linear-gradient(135deg, #22c55e 0%, #4ade80 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 1rem;
+    }
+
+    .btn-shop-now:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+        color: white;
+    }
+</style>
+
+<!-- Messages Display -->
+{% if messages %}
+<div class="container mt-3">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="container-fluid px-4 py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-user-circle me-2" style="color: #7c6fd6;"></i>
+            My Dashboard
+        </h1>
+        <p class="page-subtitle">Welcome back! Track your orders and manage your account</p>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-purple">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="stat-label">Total Orders</div>
+                <h3 class="stat-value">{{ total_orders|default:0 }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-orange">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-label">Pending Orders</div>
+                <h3 class="stat-value">{{ order_status.pending_orders.count|default:0 }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-cyan">
+                    <i class="fas fa-shipping-fast"></i>
+                </div>
+                <div class="stat-label">Shipped Orders</div>
+                <h3 class="stat-value">{{ order_status.shipped_orders.count|default:0 }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stat-icon icon-green">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-label">Completed</div>
+                <h3 class="stat-value">{{ order_status.delivered_orders.count|default:0 }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Orders Section -->
+    <h2 class="section-title">
+        <i class="fas fa-history me-2" style="color: #7c6fd6;"></i>
+        Recent Orders
+    </h2>
+
+    {% if cusomter_orders %}
+    {% for order in cusomter_orders %}
+    <div class="order-card">
+        <div class="order-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h3 class="order-title">
+                        Order #{{ order.id }}
+                        {% if order.status == 'pending' %}
+                        <span class="badge-pending ms-2">
+                            <i class="fas fa-hourglass-start me-1"></i>Pending
+                        </span>
+                        {% elif order.status == 'confirmed' %}
+                        <span class="badge-confirmed ms-2">
+                            <i class="fas fa-check-circle me-1"></i>Confirmed
+                        </span>
+                        {% elif order.status == 'processing' %}
+                        <span class="badge-processing ms-2">
+                            <i class="fas fa-cog me-1"></i>Processing
+                        </span>
+                        {% elif order.status == 'shipped' %}
+                        <span class="badge-shipped ms-2">
+                            <i class="fas fa-shipping-fast me-1"></i>Shipped
+                        </span>
+                        {% elif order.status == 'delivered' %}
+                        <span class="badge-delivered ms-2">
+                            <i class="fas fa-box-open me-1"></i>Delivered
+                        </span>
+
+                        {% endif %}
+                    </h3>
+                    <p class="order-date mb-0">
+                        <i class="fas fa-calendar me-1"></i>
+                        Ordered on {{ order.date_ordered|date:'F d, Y' }}
+                    </p>
+                </div>
+                <div>
+
+                    <a href="{% comment %}{% url 'order_details' order.id %}{% endcomment %}" class="btn-view-order">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-body">
+            <!-- Order Items -->
+            {% for item in order.items.all %}
+            <div class="product-item">
+                {% if item.product.image %}
+                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-image">
+                {% else %}
+                <div class="product-image d-flex align-items-center justify-content-center">
+                    <i class="fas fa-image" style="color: #64748b; font-size: 1.5rem;"></i>
+                </div>
+                {% endif %}
+                <div class="product-info">
+                    <div class="product-name">{{ item.product.name }}</div>
+                    <div class="product-quantity">Quantity: {{ item.quantity }}</div>
+                </div>
+                <div class="product-price">${{ item.price|floatformat:2 }}</div>
+            </div>
+            {% endfor %}
+
+            <!-- Order Total -->
+            <div class="order-total">
+                <span class="order-total-label">Total Amount:</span>
+                <span class="order-total-value">${{ order.amount|floatformat:2 }}</span>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="mt-3" style="color: #cbd5e0;">
+                <p class="mb-1">
+                    <i class="fas fa-map-marker-alt me-2" style="color: #14b8a6;"></i>
+                    <strong>Shipping to:</strong>
+                    {{ order.shipping_address.shipping_address }},
+                    {{ order.shipping_address.shipping_city }},
+                    {{ order.shipping_address.shipping_country }}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <h3 class="mb-3">No Orders Yet</h3>
+        <p class="text-muted mb-4" style="color: #94a3b8 !important;">
+            You haven't placed any orders yet. Start shopping to see your orders here!
+        </p>
+        <a href="{% url 'home' %}" class="btn-shop-now">
+            <i class="fas fa-shopping-cart me-2"></i>Start Shopping
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock content %}

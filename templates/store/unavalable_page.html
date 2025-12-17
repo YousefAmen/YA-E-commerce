@@ -18,23 +18,24 @@
                 <a href="{% url 'home' %}" class="btn btn-primary">Back to Homepage</a>
                 {% else %}
                 <a href="{% url 'home' %}" class="btn btn-primary">Back to Homepage</a>
-                <p class="mt-3 text-center">Did you have a account? <a href="{% url 'login' %}">Log in now!</a></p>
-                <p class="mt-3 text-center">Register Now? <a href="{% url 'signup' %}">Sign Up now!</a></p>
+                <p class="mt-3 text-center">Did you have a account? <a href="{% url 'account_login' %}">Log in now!</a>
+                </p>
+                <p class="mt-3 text-center">Register Now? <a href="{% url 'account_signup' %}">Sign Up now!</a></p>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 
 {% endblock content %}

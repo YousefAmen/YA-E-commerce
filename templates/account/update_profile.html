@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/account/update_profile.css' %}">
+{% endblock %}
+<div class="update-profile-wrapper">
+  <div class="container update-profile-container">
+    <div class="update-profile-card">
+
+      <!-- Header -->
+      <div class="update-profile-header">
+        <div class="profile-icon">
+          <i class="fas fa-user-edit"></i>
+        </div>
+        <h2>Update Your Profile</h2>
+        <p>Keep your information up to date</p>
+      </div>
+
+      <!-- Body -->
+      <div class="update-profile-body">
+
+        <!-- Messages -->
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          <i class="fas fa-info-circle me-2"></i>{{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+
+        <!-- Info Box -->
+        <div class="info-box">
+          <p>
+            <i class="fas fa-info-circle"></i>
+            <strong>Note:</strong> Fields marked with an asterisk (*) are required. Make sure all information is
+            accurate before saving.
+          </p>
+        </div>
+
+        <!-- Update Form -->
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- User Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">
+              <i class="fas fa-user"></i>
+              Personal Information
+            </h3>
+            {{ user_form|crispy }}
+          </div>
+
+
+          <!-- Display current profile picture if exists -->
+          {% if request.user.profile_pic %}
+          <div class="current-image">
+            <img src="{{ request.user.profile_pic.url }}" alt="Current Profile Picture">
+            <div class="current-image-text">
+              <strong>Current Profile Picture</strong>
+              <p>Upload a new image to replace this one</p>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button type="submit" class="btn btn-update">
+              <i class="fas fa-save"></i> Save Changes
+            </button>
+
+            <a href="{% url 'profile' request.user.slug request.user.id %}" class="btn btn-cancel">
+              <i class="fas fa-times"></i> Cancel
+            </a>
+          </div>
+
+        </form>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

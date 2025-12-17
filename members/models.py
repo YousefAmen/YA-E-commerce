@@ -1,109 +1,92 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
 from datetime import datetime
-from django.dispatch import receiver
 from django.core.validators import MinLengthValidator
-COUNTRIES = (
-    ("United Kingdom", "United Kingdom"),
-    ("France", "France"),
-    ("Germany", "Germany"),
-    ("Italy", "Italy"),
-    ("Spain", "Spain"),
-    ("Greece", "Greece"),
-    ("Switzerland", "Switzerland"),
-    ("Austria", "Austria"),
-    ("Netherlands", "Netherlands"),
-    ("Portugal", "Portugal"),
-    ("Sweden", "Sweden"),
-    ("Denmark", "Denmark"),
-    ("Norway", "Norway"),
-    ("Finland", "Finland"),
-    ("Belgium", "Belgium"),
-    ("Ireland", "Ireland"),
-    ("Iceland", "Iceland"),
-    ("United States", "United States"),
-    ("Canada", "Canada"),
-    ("Mexico", "Mexico"),
-    ("China", "China"),
-    ("JP", "Japan"),
-    ("India", "India"),
-    ("South Korea", "South Korea"),
-    ("Indonesia", "Indonesia"),
-    ("Thailand", "Thailand"),
-    ("Malaysia", "Malaysia"),
-    ("Philippines", "Philippines"),
-    ("Vietnam", "Vietnam"),
-    ("Singapore", "Singapore"),
-    ("Taiwan", "Taiwan"),
-    ("Hong Kong", "Hong Kong"),
-    ("Macau", "Macau"),
-    ("Brazil", "Brazil"),
-    ("Argentina", "Argentina"),
-    ("Colombia", "Colombia"),
-    ("Peru", "Peru"),
-    ("Chile", "Chile"),
-    ("Venezuela", "Venezuela"),
-    ("Australia", "Australia"),
-    ("New Zealand", "New Zealand"),
-    ("South Africa", "South Africa"),
-    ("Egypt", "Egypt"),
-    ("Morocco", "Morocco"),
-    ("Algeria", "Algeria"),
-    ("Nigeria", "Nigeria"),
-    ("Bahrain", "Bahrain"),
-    ("Kuwait", "Kuwait"),
-    ("Oman", "Oman"),
-    ("Qatar", "Qatar"),
-    ("Saudi Arabia", "Saudi Arabia"),
-    ("United Arab Emirates", "United Arab Emirates"),
-    ("Algeria", "Algeria"),
-    ("Libya", "Libya"),
-    ("Morocco", "Morocco"),
-    ("Sudan", "Sudan"),
-    ("Tunisia", "Tunisia"),
-)
+from django.contrib.auth.models import AbstractUser
+from cloudinary.models import CloudinaryField
+from django_countries.fields import CountryField
+from .managers import UserManager
+import uuid
+from django.shortcuts import reverse
+from slugify import slugify
+from ecom import settings
 
-GENDER_CHOICES = (
-    ('Male','Male'),
-    ('Female','Female'),
-)
-# create profile for customers
-class Profile(models.Model):
-    first_name         = models.CharField(max_length = 50,default = None,verbose_name = 'First Name',null=True,blank=True)
-    last_name          = models.CharField(max_length = 50,default = None,null=True,blank=True,verbose_name = 'Last Name')
-    email              = models.EmailField(max_length = 50,default = None,unique=True,null=True,blank=True)
-    gender             = models.CharField(max_length = 50,choices=GENDER_CHOICES,null=True,blank=True,default ='Male')
-    profile_image      = models.ImageField(upload_to ='images/users_profile_images/',null=True,blank=True)
-    address            = models.CharField(max_length = 400,default = None, verbose_name = 'Address' ,null=True,blank=True)
-    phone              = models.CharField(max_length=11,default = None,null=True,blank=True,validators = [
-        MinLengthValidator(11,'The Field Must be contain 11 Numbers')
-    ])
-    city               = models.CharField(max_length = 200,blank = True)
-    state              = models.CharField(max_length = 200,blank = True)
-    zipcode            = models.CharField(max_length = 200,blank = True)
-    country            = models.CharField(max_length = 200,blank = True,choices = COUNTRIES)
-    joined_at          = models.DateTimeField(default=datetime.now)
-    user               = models.OneToOneField(User,on_delete=models.CASCADE)
-    cart               = models.CharField(max_length = 200,null= True,blank = True) 
+
+class User(AbstractUser):
+    class Role(models.TextChoices):
+        MERCHANT = "merchant", "Merchant"
+        CUSTOMER = "customer", "Customer"
+
+    class Gender(models.TextChoices):
+        MALE = "male", "Male"
+        FEMALE = "female", "Female"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    role = models.CharField(max_length=255, choices=Role.choices, default=Role.CUSTOMER)
+    bio = models.TextField(max_length=500, blank=True, null=True)
+    gender = models.CharField(
+        max_length=255, choices=Gender.choices, default=Gender.MALE
+    )
+    profile_image = CloudinaryField("image", null=True, blank=True)
+    phone = models.CharField(max_length=11, blank=True, null=True)
+    birth_date = models.DateField(null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    city = models.CharField(max_length=200, blank=True)
+    state = models.CharField(max_length=200, blank=True)
+    zipcode = models.CharField(max_length=200, blank=True)
+    country = CountryField()
+    joined_at = models.DateTimeField(default=datetime.now)
+    slug = models.SlugField(default="")
+    objects = UserManager()
+    username = None
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(f"{self.first_name}-{self.last_name}")
+        if not self.id:
+            self.id = uuid.uuid4().hex[:16].upper()
+
+        super().save(*args, **kwargs)
+
+    def get_absolute_url(self):
+        return reverse("members:user_profile", args=[self.slug, self.id])
+
+
+class Customer(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="customer_profile"
+    )
+    shipping_address = models.TextField(blank=True)
+    phone = models.CharField(max_length=11)
+
     def __str__(self):
-        if self.user.email:
-            return f'User-Email: {self.user.email} ' 
-        else:
-            return f'User-Email: {self.user.first_name} {self.last_name}'
-
-#  create profile if user is sign up
-@receiver(post_save, sender=User)
-def create_user_profile(sender, instance, created, **kwargs):
-    if created:
-        user_profile = Profile(
-            user=instance, 
-            first_name = instance.first_name,
-            last_name = instance.last_name,
-            email = instance.email,
-            
-        )
-        user_profile.save()
+        return f"Customer: {self.user.email}"
 
 
+class Merchant(models.Model):
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name="marchant_profile"
+    )
+    business_name = models.CharField(max_length=255)
+    store_description = models.TextField(max_length=700)
+    business_phone = models.CharField(max_length=11)
+    business_address = models.TextField()
+    visitors = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="visited_merchants", blank=True
+    )
 
+    def __str__(self):
+        if self.business_name:
+            return self.business_name
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @property
+    def visitor_count(self):
+        return self.visitors.count()

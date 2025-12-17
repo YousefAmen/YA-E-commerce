@@ -1,359 +1,627 @@
-{%extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 {% block content %}
+
 <head>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
 </head>
-  <style>
-    .related-products-link {
-      text-decoration: none;
-      color: #212529;
-      transition: color 0.3s ease;
-    }
-  
-    .related-products-link:hover {
-      color: #4b4f56;
-    }
-  
-    .product-card {
-      transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    }
-  
-    .product-card:hover {
-      transform: translateY(-10px);
-    }
-  
-    .card-body {
-      padding: 1.5rem;
-    }
-  
-    .card-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-  
-    .anthor_image {
-      overflow: hidden; /* Ensures the image doesn't overflow outside its container */
-      border: 2px solid transparent; /* Initial border (transparent) */
-      border-radius: 5px; /* Slight rounding of the corners */
-      transition: border 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for the hover effects */
-  }
-  
-  /* Hover effect for the container */
-  .anthor_image:hover {
-      border-color: #abc1d9; /* Change border color on hover */
-      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Add a subtle shadow for depth */
-  }
-  /* Base style for the images */
-  .anthor-image-img {
-      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for the hover effects */
-  }
-  
-  /* Hover effect */
-  .anthor-image-img:hover {
-      transform: scale(1.1); /* Slightly enlarge the image */
-      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2); /* Add a subtle shadow to give depth */
+
+<style>
+  body {
+    background-color: #f8f9fa;
   }
 
-    .quantity-label {
-      font-weight: 500;
-      padding-left: 1rem;
-    }
+  .product-detail-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+  }
 
-  .product-name {
-    font-weight: bold;
-    font-size: 16px; 
+  /* Favorite Button */
+  .favorite-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 10;
+  }
+
+  .favorite-btn button {
+    background: white;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+  }
+
+  .favorite-btn button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Main Product Image */
+  .main-product-image {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8f9fa;
+    height: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .main-product-image img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+
+  .main-product-image:hover img {
+    transform: scale(1.05);
+  }
+
+  /* Thumbnail Gallery */
+  .thumbnail-gallery {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .thumbnail-item {
+    width: 80px;
+    height: 80px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .thumbnail-item:hover {
+    border-color: #667eea;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+  }
+
+  .thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Product Info */
+  .product-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1rem;
+  }
+
+  .product-description {
+    color: #718096;
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Price Section */
+  .price-section {
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .current-price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  .original-price {
+    font-size: 1.25rem;
+    color: #a0aec0;
+    text-decoration: line-through;
+    margin-left: 1rem;
+  }
+
+  .discount-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-left: 1rem;
+  }
+
+  /* Stock Info */
+  .stock-info {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+
+  .stock-available {
+    background: #d4edda;
+    color: #155724;
+  }
+
+  .stock-out {
+    background: #f8d7da;
+    color: #721c24;
+  }
+
+  /* Rating */
+  .product-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .star-rating {
+    color: #f6ad55;
+    font-size: 1.25rem;
+  }
+
+  /* Quantity Selector */
+  .quantity-section {
+    margin: 1.5rem 0;
+  }
+
+  .quantity-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-select {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn-add-cart {
+    flex: 1;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-add-cart:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-back-home {
+    background: white;
+    color: #667eea;
+    border: 2px solid #667eea;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-back-home:hover {
+    background: #667eea;
+    color: white;
+  }
+
+  /* Product Meta */
+  .product-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #4a5568;
+  }
+
+  .meta-item i {
+    color: #667eea;
+    width: 20px;
+  }
+
+  /* Related Products */
+  .related-section {
+    margin-top: 4rem;
+    padding-top: 3rem;
+    border-top: 2px solid #e2e8f0;
+  }
+
+  .related-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 2rem;
+  }
+
+  .product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+    height: 100%;
+  }
+
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: #667eea;
+  }
+
+  .product-card-img {
+    height: 250px;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  .product-card-body {
+    padding: 1.25rem;
+  }
+
+  .product-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
     line-height: 1.5;
-    margin-bottom: 5px; 
-}
-  .name-link {
-  color: #0f1111; 
-  text-decoration: none;
-  display: -webkit-box;
-  -webkit-line-clamp: 4; 
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis; 
-}
+  }
 
-  .name-link:hover {
-  color: #6c757d;
-  text-decoration: underline; 
-}
+  .product-card-title:hover {
+    color: #667eea;
+  }
 
+  /* Alert Messages */
+  #message-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    max-width: 400px;
+  }
 
-/* General container styling for uniform image dimensions */
-.product-image-container {
-  width: 100%;         
-  padding-top: 100%;   
-  position: relative;  
-  overflow: hidden;    
-  background-color: #f8f8f8; 
-  border: 1px solid #ddd; 
-  border-radius: 4px;   
-  transition: transform 0.3s ease; 
-}
+  .alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
 
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main-product-image {
+      height: 300px;
+    }
 
-.product-image-container img {
-  position: absolute;   
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;   
-  transition: transform 0.3s ease; 
-}
+    .product-title {
+      font-size: 1.5rem;
+    }
 
+    .current-price {
+      font-size: 1.5rem;
+    }
 
-.product-image-container:hover img {
-  transform: scale(1.1); 
-}
+    .action-buttons {
+      flex-direction: column;
+    }
 
+    .btn-back-home {
+      width: 100%;
+    }
+  }
+</style>
 
-.product-image-container:hover {
-  border-color:rgb(63, 63, 82);
-}
+<body>
+  <div class="container">
+    <!-- Alert Messages Container -->
+    <div id="message-container"></div>
 
-/* Lightbox styles for larger image display (Optional, provided by Lightbox plugin) */
-
-
-  </style>
-  <body>
-    
-<div class="container pt-5 pb-5">
-  {% for message in messages %}
-  <div class="alert alert-{{ message.tags }}" role="alert">
-    {{ message }}
-  </div>
-  {%endfor%}
-  <div id="message-container" class="position-fixed top-0 end-0 p-3" style="z-index: 9999;"></div>
-    <div class="row g-0">
-      <div class="d-flex justify-content-end align-items-center">
-        {% if user.is_authenticated %}
-        <form action="" method="POST">
-          {% csrf_token %}
-          <button class="btn p-0 border-0" value="{{product.id}}" id="add-fav">
-            <i class="{% if user in product.favourites.all %}fas{% else %}far{% endif %} fa-heart" 
-            id="heart-icon-{{ product.id }}" 
-            style="font-size: 24px; color: {% if user in product.favourites.all %}red{% else %}gray{% endif %};"></i>
-          </button>
-        </form>
-          {% endif %}
-    </div>
-      <div class="col-md-4 d-flex flex-column">
-        <img src="{{ product.image.url }}" class="rounded-start img-fluid img-cover anthor-image-img" style="height: 100%;" alt="...">
-      </div>
-      <div class="col-md-8 ps-3">
-        <div class="card-body">
-          <h5 class="card-title pb-2">{{product.name}}</h5>
-          
-          {% if product.description %}
-          <p class="card-text">{{product.description }}</p>
-          {% else %}
-          <p class="card-text"> {{product.description}} This is a wider card with supporting text below as a natural
-            lead-in to additional content. This content is a little bit longer.</p>
-          {% endif %}
-          <p class="card-text">Added: {{product.added}}<br><small class="text-muted">Last updated 3 mins ago</small></p>
-          {% if product.discount%}
-          <span class="card-text text-muted text-decoration-line-through">${{product.discount}}</span>
-          {{product.price}}$
-          {%else%}
-          <span class="card-text">Price:</span>
-          <span class="card-text">{{product.price}}$</span>
-          <br>
-          {%endif%}
-          {% if product.instock == "0" %}
-          <span class="card-text">in Stock:</span>
-          <span class="card-text">{{product.instock}}</span>
-          {% else %}
-          <span class="card-text">Temporarily out of stock.</span>
-          {% endif %}
-          <div class="d-flex small text-warning mb-2">
-            <div class="bi-star-fill"></div>
-            <div class="bi-star-fill"></div>
-            <div class="bi-star-fill"></div>
-            <div class="bi-star-fill"></div>
-          </div>
-          
-        </div>
-        <!-- anthor product image -->
-       
-        <div class="container pt-4">
-          <div class="row g-3 justify-content-center">
-            {% if product.image_two %}
-              <div class="col-6 col-sm-4 col-md-3">
-                <a href="{{ product.image_two.url }}" data-lightbox="product-gallery" data-title="Product Image 2">
-                  <div class="product-image-container">
-                    <img src="{{ product.image_two.url }}" alt="Product Image 2" class="img-fluid">
-                  </div>
-                </a>
-              </div>
-            {% endif %}
-        
-            {% if product.image_three %}
-              <div class="col-6 col-sm-4 col-md-3">
-                <a href="{{ product.image_three.url }}" data-lightbox="product-gallery" data-title="Product Image 3">
-                  <div class="product-image-container">
-                    <img src="{{ product.image_three.url }}" alt="Product Image 3" class="img-fluid">
-                  </div>
-                </a>
-              </div>
-            {% endif %}
-        
-            {% if product.image_foure %}
-              <div class="col-6 col-sm-4 col-md-3">
-                <a href="{{ product.image_foure.url }}" data-lightbox="product-gallery" data-title="Product Image 4">
-                  <div class="product-image-container">
-                    <img src="{{ product.image_foure.url }}" alt="Product Image 4" class="img-fluid">
-                  </div>
-                </a>
-              </div>
-            {% endif %}
-          </div>
-        </div>
-
-        <label class="ps-3 quantity-label">Quantity</label>
-        <div class="row ps-3 pt-1">
-          <div class="col-md-2">
-              {% if product.instock != 0 %}
-                  <select class="form-select" id="qty-cart">
-                      {% for i in "x"|rjust:product.instock %}
-                          <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
-                      {% endfor %}
-                  </select>
-              {% else %}
-                  <span style="display: flex;" class="fw-bold bg-light">
-                      Temporarily out of stock.
-                  </span>
-              {% endif %}
-          </div>
-      </div>
-        <div class="card-footer p-4 pt-5 border-top-0 bg-transparent d-flex justify-content-center">
-          <a class="btn btn-outline-dark mt-auto flex-grow-1" href="{% url 'home'  %}">Back To Home</a>
-          <form action="" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-dark t btn-sm ms-3 shippingIcon" value="{{product.id}}" id="add-cart" data-instock="{{ product.instock }}"> <i
-                class="fa-solid fa-cart-shopping"></i>
-            </button>
-
-          </form>
-          
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- realated products -->
-  <hr style="border:0.70px rgb(111, 110, 110) solid; margin-top:80px  ">
-  <div class="pb-5 ms-4">
-    <h3 class="">Shop More Favorites You'll Adore</h3>
-  </div>
-  <div class="row pt-3 ">
-    {% for related_product in related_products %}
-    <div class="col-md-4 mb-3 product-card">
-      <a class="related-products-link fw-bolder text-decoration-none product-name" href="{% url 'product_details' related_product.slug %}">
-        <div class="card">
-          <img src="{{ related_product.image.url }}" class="card-img-top img-cover" alt="...">
-          <div class="card-body product_name">
-            {% if related_product.name%}
-            <h5 class="card-text name-link">{{related_product.name}}</h5>
-            {%else%}
-            <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
-              content.</p>
-            {%endif%}
-          </div>
-        </div>
-      </a>
+    <!-- Django Messages -->
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show mt-3" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
     {% endfor %}
+    {% endif %}
+
+    <div class="product-detail-container">
+      <div class="row">
+        <!-- Product Images Section -->
+        <div class="col-lg-5">
+          <div class="position-relative">
+            <!-- Favorite Button -->
+            {% if user.is_authenticated %}
+            <div class="favorite-btn">
+              <form action="" method="POST">
+                {% csrf_token %}
+                <button class="btn p-0 border-0" value="{{product.id}}" id="add-fav" type="button">
+                  <i class="{% if user in product.favourites.all %}fas{% else %}far{% endif %} fa-heart"
+                    id="heart-icon-{{ product.id }}"
+                    style="font-size: 24px; color: {% if user in product.favourites.all %}red{% else %}gray{% endif %};"></i>
+                </button>
+              </form>
+            </div>
+            {% endif %}
+
+            <!-- Main Image -->
+            <div class="main-product-image">
+              {% for image in product.images.all %}
+              {% if image.is_primary %}
+              <img src="{{ image.image.url }}" alt="{{ product.name }}" id="mainImage">
+              {% endif %}
+              {% endfor %}
+            </div>
+
+            <!-- Thumbnail Gallery -->
+            <div class="thumbnail-gallery">
+              {% for image in product.images.all %}
+              <a href="{{ image.image.url }}" data-lightbox="product-gallery">
+                <div class="thumbnail-item">
+                  <img src="{{ image.image.url }}" alt="Product thumbnail">
+                </div>
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Info Section -->
+        <div class="col-lg-7">
+          <h1 class="product-title">{{ product.name }}</h1>
+
+          <!-- Rating -->
+          <div class="product-rating">
+            <div class="star-rating">
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="fas fa-star"></i>
+              <i class="far fa-star"></i>
+            </div>
+            <span class="text-muted">(4.0)</span>
+          </div>
+
+          <!-- Price -->
+          <div class="price-section">
+            {% if product.discount %}
+            <span class="current-price">${{ product.price }}</span>
+            <span class="original-price">${{ product.discount }}</span>
+            <span class="discount-badge">Save ${{ product.discount|floatformat:2|add:"-"|add:product.price|floatformat:2
+              }}</span>
+            {% else %}
+            <span class="current-price">${{ product.price }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Stock Info -->
+          {% if product.inventory.quantity > 0 %}
+          <div class="stock-info stock-available">
+            <i class="fas fa-check-circle me-2"></i>
+            In Stock ({{ product.inventory.quantity }} available)
+          </div>
+          {% else %}
+          <div class="stock-info stock-out">
+            <i class="fas fa-times-circle me-2"></i>
+            Temporarily out of stock
+          </div>
+          {% endif %}
+
+          <!-- Description -->
+          <div class="product-description">
+            {% if product.description %}
+            <p>{{ product.description }}</p>
+            {% else %}
+            <p>No description available for this product.</p>
+            {% endif %}
+          </div>
+
+          <!-- Product Meta -->
+          <div class="product-meta">
+            <div class="meta-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span><strong>Added:</strong> {{ product.added|date:"F d, Y" }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-layer-group"></i>
+              <span><strong>Category:</strong> {{ product.category.name }}</span>
+            </div>
+
+            <div class="meta-item">
+              <i class="fas fa-layer-group"></i>
+              <span><strong>Registered:</strong> {{ product.views.count }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="fas fa-layer-group"></i>
+              <span><strong>Total Views:</strong> {{ product.views_number }}</span>
+            </div>
+
+
+          </div>
+
+          <!-- Quantity Selector -->
+          {% if product.inventory.quantity > 0 %}
+          <div class="quantity-section">
+            <label class="quantity-label">
+              <i class="fas fa-sort-numeric-up me-2"></i>Quantity
+            </label>
+            <div class="row">
+              <div class="col-md-4">
+                <select class="form-select" id="qty-cart">
+                  {% for i in inventory %}
+                  <option value="{{ i }}">{{ i }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <a class="btn btn-back-home" href="{% url 'home' %}">
+              <i class="fas fa-arrow-left me-2"></i>Back to Home
+            </a>
+            {% if product.inventory.quantity > 0 %}
+            <form action="" method="POST" class="flex-fill">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-add-cart w-100" value="{{ product.id }}" id="add-cart"
+                data-instock="{{ product.inventory.quantity }}">
+                <i class="fas fa-shopping-cart me-2"></i>Add to Cart
+              </button>
+            </form>
+            {% else %}
+            <button class="btn btn-add-cart w-100" disabled>
+              <i class="fas fa-times me-2"></i>Out of Stock
+            </button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related Products Section -->
+    {% if related_products %}
+    <div class="related-section">
+      <h2 class="related-title">
+        <i class="fas fa-heart me-2" style="color: #667eea;"></i>
+        You May Also Like
+      </h2>
+      <div class="row g-4">
+        {% for related_product in related_products %}
+        <div class="col-md-4 col-lg-3">
+          <a href="{% url 'product_details' related_product.slug related_product.id %}" class="text-decoration-none">
+            <div class="product-card">
+              {% for image in related_product.images.all %}
+              {% if image.is_primary %}
+              <img src="{{ image.image.url }}" class="product-card-img" alt="{{ related_product.name }}">
+              {% endif %}
+              {% endfor %}
+              <div class="product-card-body">
+                <h5 class="product-card-title">{{ related_product.name }}</h5>
+                <p class="text-muted mb-0">${{ related_product.price }}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
   </div>
 
-
-
-<script>
-
-  $(document).on('click', '#add-cart', function (e) {
-    e.preventDefault();
-    let instock = $(this).data('instock')
-    if ( instock === 0 ) {
-      showMessage('This product is temporarily out of stock cannot added in the cart.', 'warning');
-    } else {
-
-    $.ajax({
-      
-      type: 'POST',
-      url: "{% url 'add_cart' %}",
-      data: {
-        product_id: $('#add-cart').val(),
-        product_qty: $('#qty-cart option:selected').text(),
-        csrfmiddlewaretoken: '{{csrf_token}}',
-        action: 'post'
-      },
-
-      success: function (json) {
-        //console.log(json)
-        document.getElementById('cart-quantity').
-          textContent = json.qty
-      },
-      error: function (xhr, errmsg, err) {
+  <script>
+    $(document).on('click', '#add-cart', function (e) {
+      e.preventDefault();
+      let instock = $(this).data('instock')
+      if (instock === 0) {
+        showMessage('This product is temporarily out of stock cannot added in the cart.', 'warning');
+      } else {
+        $.ajax({
+          type: 'POST',
+          url: "{% comment %}{% url 'add_cart' %}{% endcomment %}",
+          data: {
+            product_id: $('#add-cart').val(),
+            product_qty: $('#qty-cart option:selected').text(),
+            csrfmiddlewaretoken: '{{csrf_token}}',
+            action: 'post'
+          },
+          success: function (json) {
+            document.getElementById('cart-quantity').textContent = json.qty
+            showMessage('Product added to cart successfully!', 'success');
+          },
+          error: function (xhr, errmsg, err) {
+            showMessage('Failed to add product to cart.', 'danger');
+          }
+        });
       }
-    });
-    }
-  })
+    })
 
-
-$(document).on('click', '#add-fav', function (e) {
-    e.preventDefault();
-    
-    $.ajax({
-      type: 'POST',
-      url: "{% url 'add_favourites_products' %}",
-      data: {
-        product_id: $('#add-fav').val(),
-        csrfmiddlewaretoken: '{{csrf_token}}',
-        action: 'post'
-      },
-      success: function (json) {
-        var icon = $('#heart-icon-' + $('#add-fav').val());
-        if (json.action === 'added') {
+    $(document).on('click', '#add-fav', function (e) {
+      e.preventDefault();
+      $.ajax({
+        type: 'POST',
+        url: "{% url 'add_favourites_products' %}",
+        data: {
+          product_id: $('#add-fav').val(),
+          csrfmiddlewaretoken: '{{csrf_token}}',
+          action: 'post'
+        },
+        success: function (json) {
+          var icon = $('#heart-icon-' + $('#add-fav').val());
+          if (json.action === 'added') {
             icon.removeClass('far').addClass('fas').css('color', 'red');
             showMessage('Product added to favourites successfully!', 'success');
-        } else if (json.action === 'removed') {
+          } else if (json.action === 'removed') {
             icon.removeClass('fas').addClass('far').css('color', 'gray');
             showMessage('Product removed from favourites.', 'info');
+          }
+        },
+        error: function (xhr, errmsg, err) {
+          console.error(`Error: ${errmsg}`);
         }
-    },
-      error: function (xhr, errmsg, err) {
-        console.error(`Error: ${errmsg}`);
-      }
-    });
-  })
-  function showMessage(message, type) {
-    console.log("Showing message:", message, "Type:", type); // Debugging
+      });
+    })
 
-    // Remove any existing alert message
-    $('.alert').remove();
-
-    // Create the alert div dynamically
-    var alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+    function showMessage(message, type) {
+      $('.alert').remove();
+      var alertHtml = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
                         ${message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>`;
-
-    // Append the alert to the message container
-    $('#message-container').append(alertHtml);
-
-    // Optionally, you can set the message to disappear after a few seconds
-    setTimeout(function () {
+      $('#message-container').append(alertHtml);
+      setTimeout(function () {
         $('.alert').alert('close');
-    }, 3000);
-  }
- 
- 
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
+      }, 3000);
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/js/lightbox.min.js"></script>
 </body>
 
 {% endblock content %}

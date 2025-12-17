@@ -1,14 +1,32 @@
 from django.urls import path
-from .views import(signup_user,
-  login_user,logout_user,
-  update_profile,profile,update_password
-  )
-urlpatterns  = [
-  path('signup/',signup_user,name='signup'),
-  path('login/',login_user,name='login'),
-  path('logout/',logout_user,name='logout'),
-  path('profile/',profile,name='profile'),
-  path('profile/update',update_profile ,name = 'update_profile'),
-  path('update_password/',update_password,name= 'update_password')
-] 
 
+from . import views
+
+urlpatterns = [
+    path("profile/<slug:slug>/<uuid:id>/", views.profile, name="profile"),
+    path(
+        "profile/update/<slug:slug>/<uuid:id>/",
+        views.update_profile,
+        name="update_profile",
+    ),
+    path(
+        "<uuid:id>/profile//delete/",
+        views.DeleteUserProfile.as_view(),
+        name="delete_profile",
+    ),
+    path(
+        "complete_merchant/<slug:slug>/<uuid:id>/",
+        views.complete_merchant,
+        name="complete_merchant",
+    ),
+    path(
+        "merchant/details/<slug:slug>/<uuid:id>/",
+        views.merchant_details,
+        name="merchant_details",
+    ),
+    path(
+        "dashboard/",
+        views.admins_dashboard,
+        name="admins_dashboard",
+    ),
+]

@@ -1,102 +1,12 @@
 {% extends 'base.html' %}
 {% load humanize %}
 {% load static %}
+
 {% block content %}
 
-<!-- Custom CSS Styling for Cards and Product Details -->
-<style>
-    /* Product Title with Webkit for line-clamping */
-    .product-name {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.2;
-        /* Limit the product name to two lines */
-        max-height: 2.4em;
-
-        /* Only apply line clamp if the browser supports it */
-        @supports (-webkit-line-clamp: 2) {
-            -webkit-line-clamp: 2;
-        }
-    }
-
-
-    .name-link {
-        color: #0f1111;
-        text-decoration: none;
-        display: inline-block;
-        width: 100%;  /* Ensure the ellipsis works properly */
-    }
-
-    .name-link:hover {
-        color: #6c757d;
-        text-decoration: underline;
-    }
-
-    /* Card Image Hover Effect */
-    .card:hover .card-img-top {
-        transform: scale(1.05);
-        transition: transform 0.3s ease;
-    }
-
-    /* Card Hover Effect */
-    .card:hover {
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-        transform: translateY(-5px);
-        transition: box-shadow 0.3s ease, transform 0.3s ease;
-    }
-
-    .card-img-top {
-        height: 250px;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .card-body {
-        padding: 15px;
-    }
-
-    /* Price Styles */
-    .price {
-        font-size: 18px;
-        font-weight: 700;
-        color: #000;
-    }
-
-    .discounted-price {
-        font-size: 16px;
-        color: #6c757d;
-        text-decoration: line-through;
-    }
-
-    .badge-sale {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        background-color: #dc3545;
-        color: white;
-        font-size: 14px;
-        padding: 5px 10px;
-    }
-
-    /* Love Icon for Favorites */
-    .love-icon {
-        font-size: 24px;
-        cursor: pointer;
-        color: #6c757d;
-    }
-
-    .love-icon.active {
-        color: red;
-    }
-
-    /* Card Footer Styling */
-    .card-footer {
-        background-color: white;
-        border-top: 0;
-    }
-</style>
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+{% endblock %}
 
 <!-- Flash Messages -->
 {% for message in messages %}
@@ -105,61 +15,97 @@
 </div>
 {% endfor %}
 
-<!-- Header with Background Image -->
-<header class="bg-dark py-5" style="background-image: url('{% static 'images/background-image-home.jpg' %}'); background-size: cover; background-position: center;">
-    <div class="container text-center text-white">
-        <h1 class="display-4 fw-bolder">Shopping in Online</h1>
-        <p class="lead fw-normal text-white-80 mb-0">YA-Ecommerce: The Best Online E-Commerce in the World.</p>
+<!-- Hero Header -->
+<header class="hero-header">
+    <div class="container">
+        <div class="hero-content">
+            <h1>Shopping in Online</h1>
+            <p>YA-Ecommerce: The Best Online E-Commerce in the World.</p>
+        </div>
     </div>
 </header>
 
-<!-- Product Section -->
-<section class="py-5">
-    {% for category in categories %}
-        {% if category.product_set.all %}
-            <div class="container mt-5">
-                <h2 class="text-center mb-4">Most Customers Viewed These Products</h2>
-                <hr class="mb-4" style="border: 0.5px solid #ccc;">
-                <div class="row">
-                    {% for product in products %}
-                        {% if category == product.category %}
-                            <div class="col-md-4">
-                                <div class="card mb-4 shadow-sm">
-                                    <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                                    <div class="card-body">
-                                        <div class="product-name">
-                                            <a href="{% url 'product_details' product.slug %}" class="name-link">
-                                                <h5>{{ product.name|title }}</h5>
-                                            </a>
-                                        </div>
-                                        <p class="card-text">
-                                            <strong>Price:</strong>
-                                            {% if product.discount %}
-                                                <span class="discounted-price">${{ product.discount|floatformat:2|intcomma }}</span>
-                                                ${{ product.price|floatformat:2|intcomma }}
-                                            {% else %}
-                                                ${{ product.price|floatformat:2|intcomma }}
-                                            {% endif %}
-                                        </p>
-                                        <p class="card-text">
-                                            <strong>In Stock:</strong>
-                                            {% if product.instock > 0 %}
-                                            <span>{{product.instock}}</span></p>
-                                            {% else %}
-                                            <span class="out-of-stock">Temporarily out of stock.</span>
-                                            {% endif %}
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{% url 'product_details' product.slug %}" class="btn btn-outline-dark">View Details</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
+<!-- Main Content -->
+<div class="container main-container">
+    <div class="category-section">
+        <div class="category-header">
+            <h2 class="category-title">Most Customers Viewed These Products</h2>
+        </div>
+
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    {% if product.discount %}
+                    <div class="sale-badge">SALE</div>
+                    {% endif %}
+                    {% for image in product.images.all %}
+                    {% if image.is_primary %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}" />
+                    {% endif %}
+                    {% empty %}
+                    <img src="{{image.image}}" alt="{{ product.name }}" />
                     {% endfor %}
                 </div>
+
+                <div class="product-body">
+                    <div class="stock-badge">
+                        <span class="stock-dot"></span>
+
+                        {% if product.inventory.quantity > 0 %}In Stock {{product.inventory.quantity}} {% else %}
+                        <span class="out-of-stock">temporarily out
+                            of stock</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="product-name">
+                        <a href="{% url 'product_details' product.slug product.id %}" class="name-link">
+                            {{ product.name|title }}
+                        </a>
+                    </div>
+
+                    <div class="product-description">
+                        <p>
+                            {{product.description|truncatewords:5}}
+                        </p>
+                    </div>
+
+                    <div class="product-rating">
+                        <span class="stars">★★★★☆</span>
+                        <span class="rating-count">(4.0)</span>
+                    </div>
+
+                    <div class="price-section">
+                        {% if product.discount %}
+                        <span class="price-original">${{ product.discount|floatformat:2|intcomma }}</span>
+                        <span class="price-current">${{ product.price|floatformat:2|intcomma }}</span>
+                        <span class="discount-badge">SAVE</span>
+                        {% else %}
+                        <span class="price-current">${{ product.price|floatformat:2|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Product Footer -->
+                <div class="product-footer">
+                    <a class="btn-view-product" href="{% url 'product_details' product.slug product.id %}">
+                        View Details
+                    </a>
+                </div>
             </div>
-        {% endif %}
-    {% endfor %}
-</section>
+            {% empty %}
+            <div class="empty-category">
+                <div class="empty-icon">📦</div>
+                <h3>No Products Available</h3>
+                <p>Check back soon for new products!</p>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<!-- Bottom Spacing -->
+<div style="padding-bottom: 3rem;"></div>
 
 {% endblock content %}

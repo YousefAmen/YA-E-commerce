@@ -1,81 +1,128 @@
-from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
-from django.contrib.auth.models import User
+from .models import User, Merchant, Customer
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Profile
-GENDER_CHOICES = (
-    ('Male','Male'),
-    ('Female','Female'),
-)
+from allauth.account.forms import SignupForm
+from django_countries.fields import CountryField
+from django_countries.widgets import CountrySelectWidget
+from .signals import user_signed_up
 
 
-class SignUpForm(UserCreationForm):
-	email 			= forms.EmailField(label="", widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Email Address'}))
-	first_name 	= forms.CharField(label="", max_length=100, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'First Name'}))
-	last_name 	= forms.CharField(label="", max_length=100, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder':'Last Name'}))
-	gender 			= forms.ChoiceField(choices = GENDER_CHOICES,label="",widget=forms.Select(attrs = {'class':'form-control', 'placeholder':'Gender'}))
-	class Meta:
-		model = User
-		fields = ('username', 'first_name', 'last_name','email','gender', 'password1', 'password2')
+class SignUpForms(SignupForm):
+    first_name = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Your First Name"}
+        ),
+    )
 
-	def __init__(self, *args, **kwargs):
-		super(SignUpForm, self).__init__(*args, **kwargs)
+    last_name = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Your Last Name"}
+        ),
+    )
 
-		self.fields['username'].widget.attrs['class'] = 'form-control'
-		self.fields['username'].widget.attrs['placeholder'] = 'User Name'
-		self.fields['username'].label = ''
-		self.fields['username'].help_text = '<span class="form-text text-muted"><small>Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</small></span>'
+    role = forms.ChoiceField(
+        choices=User.Role.choices, widget=forms.Select(attrs={"class": "form-control"})
+    )
 
-		self.fields['password1'].widget.attrs['class'] = 'form-control'
-		self.fields['password1'].widget.attrs['placeholder'] = 'Password'
-		self.fields['password1'].label = ''
-		self.fields['password1'].help_text = '<ul class="form-text text-muted small"><li>Your password can\'t be too similar to your other personal information.</li><li>Your password must contain at least 8 characters.</li><li>Your password can\'t be a commonly used password.</li><li>Your password can\'t be entirely numeric.</li></ul>'
+    gender = forms.ChoiceField(
+        choices=User.Gender.choices,
+        widget=forms.Select(attrs={"class": "form-control"}),
+    )
 
-		self.fields['password2'].widget.attrs['class'] = 'form-control'
-		self.fields['password2'].widget.attrs['placeholder'] = 'Confirm Password'
-		self.fields['password2'].label = ''
-		self.fields['password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
+    birth_date = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date", "class": "form-control"}),
+    )
+
+    city = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "City"}),
+    )
+
+    state = forms.CharField(
+        max_length=255,
+        widget=forms.TextInput(attrs={"class": "form-control", "placeholder": "State"}),
+    )
+
+    zipcode = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "ZIP Code"}
+        ),
+    )
+
+    country = CountryField(blank_label="Select Country").formfield(
+        widget=CountrySelectWidget(
+            attrs={"class": "form-control", "size": "5", "placeholder": "Country"}
+        ),
+        required=False,
+    )
+
+    def save(self, request):
+        user = super().save(request)
+        data = self.cleaned_data
+
+        user.role = data["role"]
+        user.first_name = data["first_name"]
+        user.last_name = data["last_name"]
+        user.gender = data["gender"]
+        user.birth_date = data["birth_date"]
+        user.city = data["city"]
+        user.state = data["state"]
+        user.zipcode = data["zipcode"]
+        user.country = data["country"]
+        user.save()
+
+        user_signed_up.send(
+            sender=user.__class__, user=user, signup_data={"role": data["role"]}
+        )
+        return user
 
 
-class UserProfileForm(forms.ModelForm):
-	class Meta:
-		model  	= Profile
-		fields  = ['first_name','last_name','email','gender','profile_image','phone','address','state','city','zipcode','country',]
-		widgets = {
-			'first_name':forms.TextInput(attrs = {'class':'form-control','placeholder':'Firt Name'}),
-			'last_name':forms.TextInput(attrs = {'class':'form-control','placeholder':'Last Name'}),
-			'email':forms.TextInput(attrs = {'class':'form-control','placeholder':'Email'}),
-			'gender':forms.Select(attrs = {'class':'form-control','placeholder':'gender'}),
-			'profile_image':forms.FileInput(attrs={'class':'form-control'}),
-			'phone':forms.TextInput(attrs={'class':'form-control','placeholder':'Enter Your Phone Number'}),
-			'address':forms.TextInput(attrs={'class':'form-control','placeholder':'Enter Your Adderss'}),
-			'state':forms.TextInput(attrs={'class':'form-control','placeholder':'Enter Your State'}),
-			'city':forms.TextInput(attrs={'class':'form-control','placeholder':'Enter Your City'}),
-			'zipcode':forms.TextInput(attrs={'class':'form-control','placeholder':'Enter Your City'}),
-			'country':forms.Select(attrs={'class':'form-control','placeholder':'Enter Your Countery'}),
-		} 
+class SelectRole(forms.Form):
+    ROLE_CHOICES = [
+        ("merchant", "Merchant"),
+        ("customer", "Customer"),
+    ]
+
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.RadioSelect,
+        label="Select your account type",
+    )
 
 
-class ChangePasswordForm(PasswordChangeForm):
-		def __init__(self, *args, **kwargs):
-			super(PasswordChangeForm, self).__init__(*args, **kwargs)
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "role",
+            "bio",
+            "gender",
+            "profile_image",
+            "phone",
+            "city",
+            "state",
+            "zipcode",
+        ]
 
-			self.fields['old_password'].widget.attrs['class'] = 'form-control'
-			self.fields['old_password'].widget.attrs['placeholder'] = 'Enter The Old Password'
-			self.fields['old_password'].label = ''
 
-			self.fields['new_password1'].widget.attrs['class'] = 'form-control'
-			self.fields['new_password1'].widget.attrs['placeholder'] = 'Enter The New Password'
-			self.fields['new_password1'].label = ''
-			self.fields['new_password1'].help_text = '<ul class="form-text text-muted small"><li>Your password can\'t be too similar to your other personal information.</li><li>Your password must contain at least 8 characters.</li><li>Your password can\'t be a commonly used password.</li><li>Your password can\'t be entirely numeric.</li></ul>'
+class MerchentForm(forms.ModelForm):
+    class Meta:
+        model = Merchant
+        fields = [
+            "business_name",
+            "store_description",
+            "business_phone",
+            "business_address",
+        ]
 
-			self.fields['new_password2'].widget.attrs['class'] = 'form-control'
-			self.fields['new_password2'].widget.attrs['placeholder'] = 'Confirm Password'
-			self.fields['new_password2'].label = ''
-			self.fields['new_password2'].help_text = '<span class="form-text text-muted"><small>Enter the same password as before, for verification.</small></span>'
-		
-		def clean_new_password1(self):
-			new_password = self.cleaned_data['new_password1']
-			if len(new_password) > 15:
-				raise ValidationError('the password must be less than 15 characters ')
-			return new_password
+
+class CustomerForm(forms.ModelForm):
+    class Meta:
+        model = Customer
+        fields = ["shipping_address", "phone"]

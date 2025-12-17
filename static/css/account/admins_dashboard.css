@@ -1,0 +1,167 @@
+
+    .analytics-dashboard {
+        background: linear-gradient(to bottom, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+        padding-bottom: 50px;
+        margin-top: 20px;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .container-fluid {
+        max-width: 95%;
+        margin: 0 auto;
+    }
+
+    .dark-card {
+        background-color: #2d2d2d !important;
+        border: 1px solid #3a3a3a !important;
+    }
+
+    .bg-dark-card {
+        background-color: #252525 !important;
+    }
+
+    .bg-dark-light {
+        background-color: #333333 !important;
+    }
+
+    .text-light-gray {
+        color: #b0b0b0 !important;
+    }
+
+    .border-secondary {
+        border-color: #444 !important;
+    }
+
+    /* Icon Shapes */
+    .icon-shape {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+    }
+
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+
+    .bg-warning-gradient {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    /* Cards */
+    .dark-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .dark-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    /* Typography */
+    h2 {
+        font-size: 2.5rem;
+    }
+
+    /* Progress Bars */
+    .dark-progress {
+        background-color: #1a1a1a;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        border-radius: 10px;
+    }
+
+    /* Table Styling */
+    .table-dark-custom {
+        color: #ffffff;
+    }
+
+    .table-dark-custom thead {
+        background-color: #333333;
+    }
+
+    .table-dark-custom tbody tr {
+        background-color: #2d2d2d;
+        border-bottom: 1px solid #3a3a3a;
+        transition: background-color 0.2s;
+    }
+
+    .table-dark-custom tbody tr:hover {
+        background-color: #363636 !important;
+    }
+
+    .table-dark-custom td,
+    .table-dark-custom th {
+        border: none;
+        padding: 1rem;
+    }
+
+    /* Badges */
+    .badge-primary {
+        background-color: #667eea;
+    }
+
+    .badge-success {
+        background-color: #38ef7d;
+    }
+
+    .badge-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+
+    .badge-info {
+        background-color: #17a2b8;
+    }
+
+    /* Buttons */
+    .btn-outline-light {
+        color: #ffffff;
+        border-color: #666;
+    }
+
+    .btn-outline-light:hover {
+        background-color: #444;
+        border-color: #666;
+        color: #ffffff;
+    }
+
+    /* Category Icon */
+    .category-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.875rem;
+    }
+
+    /* Product Thumbnail */
+    .product-thumb {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .product-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-thumb i {
+        font-size: 1.2rem;
+    }
