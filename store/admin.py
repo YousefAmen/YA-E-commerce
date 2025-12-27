@@ -11,10 +11,10 @@ class UserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.Category)
-admin.site.register(models.Contact)
+admin.site.register(models.CategoryAttribute)
+admin.site.register(models.Attribute)
 admin.site.register(models.Product)
+admin.site.register(models.ProductAttributeValue)
 admin.site.register(models.Inventory)
 admin.site.register(models.ProductImage)
-admin.site.register(models.Laptop)
-admin.site.register(models.Phone)
-admin.site.register(models.Book)
+admin.site.register(models.Contact)

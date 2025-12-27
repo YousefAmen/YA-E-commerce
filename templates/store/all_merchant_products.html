@@ -1,0 +1,107 @@
+{% extends 'base.html'%}
+{% load static %}
+{% load humanize %}
+
+
+{% block content %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/all_merchant_products.css' %}">
+{% endblock %}
+
+<!-- Hero Header -->
+<header class="hero-header">
+    <div class="container">
+        <div class="hero-content">
+            <h1>{{ merchant.user.first_name }} {{ merchant.user.last_name }}'s Products</h1>
+            <p>Browse all products from this merchant</p>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="container main-container">
+    {% if products %}
+    <div class="merchant-section">
+        <div class="merchant-header">
+            <h2 class="merchant-title">
+                All Products
+                <span class="product-count">{{ products.count }}</span>
+            </h2>
+        </div>
+
+        <div class="products-grid">
+            {% for product in products %}
+            <div class="product-card">
+                <div class="product-image-wrapper">
+                    {% if product.discount %}
+                    <div class="sale-badge">SALE</div>
+                    {% endif %}
+
+                    {% for image in product.images.all %}
+                    {% if image.is_primary %}
+                    <img src="{{ image.image.url }}" alt="{{ product.name }}" />
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if not product.images.all %}
+                    <img src="https://dummyimage.com/450x300/e2e8f0/64748b.jpg" alt="{{ product.name }}" />
+                    {% endif %}
+                </div>
+
+                <!-- Product Body -->
+                <div class="product-body">
+                    {% if product.inventory.quantity > 0 %}
+                    <div class="stock-badge">
+                        <span class="stock-dot"></span>
+                        In Stock ({{ product.inventory.quantity }})
+                    </div>
+                    {% else %}
+                    <div class="stock-badge out-of-stock">
+                        <span class="stock-dot"></span>
+                        Out of Stock
+                    </div>
+                    {% endif %}
+
+                    <div class="product-name">
+                        <a href="{% url 'product_details' product.slug product.id %}" class="name-link">
+                            {{ product.name|title }}
+                        </a>
+                    </div>
+
+                    <div class="product-rating">
+                        <span class="stars">★★★★☆</span>
+                        <span class="rating-count">(4.0)</span>
+                    </div>
+
+                    <div class="price-section">
+                        {% if product.discount %}
+                        <span class="price-original">${{ product.discount|floatformat:2|intcomma }}</span>
+                        <span class="price-current">${{ product.price|floatformat:2|intcomma }}</span>
+                        <span class="discount-badge">SAVE</span>
+                        {% else %}
+                        <span class="price-current">${{ product.price|floatformat:2|intcomma }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="product-footer">
+                    <a class="btn-view-product" href="{% url 'product_details' product.slug product.id %}">
+                        View Details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📦</div>
+        <h3>No Products Available</h3>
+        <p>This merchant hasn't listed any products yet.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div style="padding-bottom: 3rem;"></div>
+
+{% endblock content %}

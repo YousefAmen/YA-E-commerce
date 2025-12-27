@@ -1,20 +1,22 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<!-- Header-->
+
 <style>
+  /* Product Name Styles */
   .product-name {
-    font-weight: bold;
-    font-size: 16px;
-    line-height: 1.5;
-    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    color: #1a1a1a;
   }
 
   .name-link {
-    color: #0f1111;
+    color: #1a1a1a;
     text-decoration: none;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -22,84 +24,353 @@
 
   .name-link:hover {
     color: #6c757d;
-    text-decoration: underline;
+    text-decoration: none;
+  }
+
+  /* Header Section */
+  .page-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    padding: 80px 0;
+    position: relative;
+  }
+
+  .header-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  /* Product Card */
+  .product-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    height: 100%;
+    background: white;
+    position: relative;
+  }
+
+  .product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: #d1d5db;
+  }
+
+  /* Product Image */
+  .product-image-wrapper {
+    position: relative;
+    height: 280px;
+    overflow: hidden;
+    background: #f9fafb;
+  }
+
+  .product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* Card Body */
+  .product-card-body {
+    padding: 1.25rem;
+  }
+
+  /* Stock Badge */
+  .stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #d1fae5;
+    color: #065f46;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+
+  .stock-badge::before {
+    content: '•';
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .out-of-stock-badge {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Star Rating */
+  .star-rating {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .stars {
+    color: #fbbf24;
+    font-size: 16px;
+    letter-spacing: 2px;
+  }
+
+  .rating-number {
+    color: #6b7280;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Price Section */
+  .price-section {
+    margin-bottom: 16px;
+  }
+
+  .current-price {
+    font-size: 28px;
+    font-weight: 700;
+    color: #6366f1;
+    line-height: 1;
+  }
+
+  .original-price {
+    font-size: 16px;
+    color: #9ca3af;
+    text-decoration: line-through;
+    margin-left: 8px;
+  }
+
+  /* Action Buttons Container */
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  /* Buttons */
+  .btn-view-details {
+    flex: 1;
+    background: #6366f1;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-view-details:hover {
+    background: #4f46e5;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-update {
+    flex: 1;
+    background: #10b981;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-update:hover {
+    background: #059669;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+
+  .btn-delete {
+    flex: 1;
+    background: #ef4444;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-delete:hover {
+    background: #dc2626;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+  }
+
+  /* Flash Messages */
+  .alert {
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 5rem 2rem;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    color: #d1d5db;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #374151;
+    margin-bottom: 0.75rem;
+  }
+
+  .empty-state p {
+    color: #6b7280;
+    font-size: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .product-image-wrapper {
+      height: 220px;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+    }
+
+    .current-price {
+      font-size: 24px;
+    }
   }
 </style>
 
+<!-- Flash Messages -->
 {% for message in messages %}
-<div class="alert alert-{{tags}}" role="alert">
-  {{message}}
+<div class="alert alert-{{ message.tags }}" role="alert">
+  {{ message }}
 </div>
-{%endfor%}
-<header class="bg-dark py-5">
-  <div class="container px-4 px-lg-5 my-5">
-    <div class="text-center text-white">
-      <h1 class="display-4 fw-bolder">Update Products Page</h1>
-      <p class="lead fw-normal text-white-80 mb-0">YA-Ecommers The Best Online Ecommers in The World.</p>
-    </div>
+{% endfor %}
 
+<!-- Header -->
+<header class="page-header">
+  <div class="container px-4 px-lg-5">
+    <div class="text-center">
+      <h1 class="header-title">Update Products</h1>
+      <p class="header-subtitle">Manage and update your product collection</p>
+    </div>
   </div>
 </header>
-<!-- Section-->
+
+<!-- Products Section -->
 <section class="py-5">
-  <!-- get all products related to category -->
-
-  <div class="container px-4 px-lg-5 mt-5">
-
-    <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+  <div class="container px-4 px-lg-5 mt-4">
+    {% if products %}
+    <div class="row gx-4 gx-lg-5 row-cols-1 row-cols-md-2 row-cols-xl-3">
       {% for product in products %}
       <div class="col mb-5">
-        <!-- Product image-->
-        {% if product.discount %}
-        <div class="badge bg-dark text-white position-absolute" style="top: 0.5rem; right: 0.5rem">Sale</div>
-        {% endif%}
-        {% if product.image%}
-        <img class="card-img-top" src="{{product.image.url}}" alt="..." />
-        {%else%}
-        <img class="card-img-top" src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="..." />
-        {%endif%}
-        <!-- Product details-->
-        <div class="card-body p-4">
-          <div class="text-center">
-            <!-- Product name-->
-            <div class="product-name">
-              <h5 class="card-name">
-                <a href="{% url 'product_details' product.slug product.id %}" class="name-link bg-">
-                  {{ product.name|title }}
-                </a>
-              </h5>
-            </div>
-            <!-- Product price-->
-            {% if product.discount %}
-            <span class="text-muted text-decoration-line-through">${{product.discount}}</span>
-            {{product.price}}$
+        <div class="product-card">
+          <!-- Product Image -->
+          <div class="product-image-wrapper">
+            {% for image in product.images.all %}
+            {% if image.is_primary %}
+            <img src="{{ image.image.url }}" alt="{{ product.name }}" />
             {% else %}
-            <span>{{product.price}}$</span>
+            <img src="https://dummyimage.com/450x300/dee2e6/6c757d.jpg" alt="{{ product.name }}" />
             {% endif %}
-            <!-- <div class="d-flex justify-content-center small text-warning mb-2">
-                <div class="bi-star-fill"></div>
-                <div class="bi-star-fill"></div>
-                <div class="bi-star-fill"></div>
-                <div class="bi-star-fill"></div>
-              </div> -->
+            {% endfor %}
           </div>
-        </div>
-        <!-- Product actions-->
-        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent d-flex justify-content-center">
-          <a class="btn btn-outline-secondary mt-auto flex-grow-1"
-            href="{% url 'product_details' product.slug product.id %}">More</a>
-          <a href="{% url 'update_product' product.slug product.id %}"
-            class="btn btn-outline-primary mt-auto flex-grow-1 ms-3 p-1">Update</a>
 
-          <a href="{% url 'delete_products' product.slug %}"
-            class="btn btn-outline-danger mt-auto flex-grow-1 ms-3 p-1">Delete</a>
+          <div class="product-card-body">
+            {% if product.inventory.quantity > 0 %}
+            <div class="stock-badge">In Stock {{ product.inventory.quantity }}</div>
+            {% else %}
+            <div class="stock-badge out-of-stock-badge">Out of Stock</div>
+            {% endif %}
 
+            <!-- Product Name -->
+            <div class="product-name">
+              <a href="{% url 'product_details' product.slug product.id %}" class="name-link">
+                {{ product.name|title }}
+              </a>
+            </div>
+
+            <!-- Star Rating -->
+            <div class="star-rating">
+              <span class="stars">★★★★☆</span>
+              <span class="rating-number">(4.0)</span>
+            </div>
+
+            <!-- Price -->
+            <div class="price-section">
+              {% if product.discount %}
+              <span class="current-price">${{ product.price }}</span>
+              <span class="original-price">${{ product.discount }}</span>
+              {% else %}
+              <span class="current-price">${{ product.price }}</span>
+              {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+              <a href="{% url 'product_details' product.slug product.id %}" class="btn-view-details">
+                View
+              </a>
+              <a href="{% url 'update_product' product.slug product.id %}" class="btn-update">
+                Update
+              </a>
+              <a href="{% url 'delete_products' product.slug product.id %}" class="btn-delete">
+                Delete
+              </a>
+            </div>
+          </div>
         </div>
       </div>
       {% endfor %}
     </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fas fa-box-open"></i>
+      <h3>No Products Found</h3>
+      <p>You haven't added any products yet. Start by creating your first product!</p>
+    </div>
+    {% endif %}
   </div>
-
-
 </section>
+
 {% endblock content %}

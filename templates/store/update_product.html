@@ -1,16 +1,285 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
 {% block content %}
-<header class="bg-dark py-5">
-  <div class="container px-4 px-lg-5 my-5">
-    <div class="text-center text-white">
-      <h1 class="display-4 fw-bolder">Update Products Page</h1>
-      <p class="lead fw-normal text-white-80 mb-0">YA-Ecommers The Best Online Ecommers in The World.</p>
+
+<style>
+  /* Header Section */
+  .page-header {
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    padding: 60px 0;
+    position: relative;
+  }
+
+  .header-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 0.75rem;
+  }
+
+  .header-subtitle {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  /* Form Container */
+  .form-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    padding: 2.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+  }
+
+  .form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #f3f4f6;
+  }
+
+  .form-header h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-header p {
+    color: #6b7280;
+    font-size: 1rem;
+  }
+
+  /* Form Fields */
+  .form-container form p {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-container label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .form-container input[type="text"],
+  .form-container input[type="number"],
+  .form-container input[type="email"],
+  .form-container input[type="url"],
+  .form-container input[type="file"],
+  .form-container textarea,
+  .form-container select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #ffffff;
+    color: #1a1a1a;
+  }
+
+  .form-container input[type="text"]:focus,
+  .form-container input[type="number"]:focus,
+  .form-container input[type="email"]:focus,
+  .form-container input[type="url"]:focus,
+  .form-container input[type="file"]:focus,
+  .form-container textarea:focus,
+  .form-container select:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  }
+
+  .form-container textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+
+  .form-container input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    cursor: pointer;
+  }
+
+  /* Checkbox Field */
+  .form-container p:has(input[type="checkbox"]) {
+    display: flex;
+    align-items: center;
+  }
+
+  .form-container p:has(input[type="checkbox"]) label {
+    margin-bottom: 0;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+
+  /* File Input Special Styling */
+  .form-container input[type="file"] {
+    padding: 0.5rem;
+    cursor: pointer;
+  }
+
+  /* Help Text */
+  .form-container .helptext {
+    display: block;
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  /* Error Messages */
+  .form-container .errorlist {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .form-container .errorlist li {
+    color: #dc2626;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .form-container input.error,
+  .form-container textarea.error,
+  .form-container select.error {
+    border-color: #dc2626;
+  }
+
+  /* Button Container */
+  .button-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #f3f4f6;
+  }
+
+  /* Update Button */
+  .btn-update {
+    flex: 1;
+    background: #6366f1;
+    color: white;
+    border: none;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+
+  .btn-update:hover {
+    background: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  .btn-update:active {
+    transform: translateY(0);
+  }
+
+  /* Cancel Button */
+  .btn-cancel {
+    flex: 1;
+    background: white;
+    color: #6b7280;
+    border: 2px solid #d1d5db;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-cancel:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+    color: #374151;
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  /* Required Field Indicator */
+  .form-container label:after {
+    content: "";
+  }
+
+  .form-container .required label:after {
+    content: " *";
+    color: #dc2626;
+    font-weight: 700;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .form-container {
+      margin: 30px 15px;
+      padding: 1.5rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .form-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .button-container {
+      flex-direction: column;
+    }
+
+    .btn-update,
+    .btn-cancel {
+      width: 100%;
+    }
+  }
+</style>
+
+<!-- Header -->
+<header class="page-header">
+  <div class="container px-4 px-lg-5">
+    <div class="text-center">
+      <h1 class="header-title">Update Product</h1>
+      <p class="header-subtitle">Edit and update your product information</p>
     </div>
   </div>
 </header>
-<form method="POST" class="mb-center" style="margin: 50px;" enctype="multipart/form-data">
-  {%csrf_token%}
-  {{forms.as_p}}
-  <button type="submit" class="btn btn-dark">Update</button>
-</form>
+
+<!-- Form Container -->
+<div class="form-container">
+  <div class="form-header">
+    <h2>Product Details</h2>
+    <p>Update the information below to modify your product</p>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form|crispy }}
+
+    <div class="button-container">
+      <button type="submit" class="btn-update">Update Product</button>
+      <a href="{% url 'update_products' %}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<!-- Bottom Spacing -->
+<div style="padding-bottom: 3rem;"></div>
+
 {% endblock content %}

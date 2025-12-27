@@ -1,133 +1,85 @@
 from django import forms
 from .models import (
     Category,
+    CategoryAttribute,
     Contact,
-    Phone,
-    Laptop,
-    Tablet,
-    Headphone,
-    Clothing,
-    Shoe,
-    Watch,
-    SportEquipment,
+    Product,
     ProductImage,
     Inventory,
 )
 
-exclude = [
-    "merchant",
-    "category",
-    "favourites",
-    "views",
-    "slug",
-    "views_number",
-    "visitors",
-    "created_at",
-    "updated_at",
-]
 
+class DaynamicProductForm(forms.ModelForm):
 
-class PhoneForm(forms.ModelForm):
     class Meta:
-        model = Phone
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe your phone..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
+        model = Product
+        fields = ["product_model", "name", "description", "price", "discount"]
+
+    def __init__(self, category_id=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if category_id:
+            category = Category.objects.get(id=category_id)
+
+            category_attributes = CategoryAttribute.objects.filter(category=category)
+
+            for cat_attr in category_attributes:
+                attribute = cat_attr.attribute
+                field_name = f"attr_{attribute.id}"
+                label = attribute.name
+                if attribute.unit:
+                    label = f"{attribute.name} ({attribute.unit})"
+
+                if attribute.attribute_type == "text":
+                    self.fields[field_name] = forms.CharField(
+                        label=label,
+                        required=cat_attr.is_required,
+                        widget=forms.TextInput(
+                            {"placeholder": f"Enter {attribute.name}"}
+                        ),
+                    )
+                elif attribute.attribute_type == "number":
+                    self.fields[field_name] = forms.DecimalField(
+                        label=label,
+                        required=cat_attr.is_required,
+                        widget=forms.NumberInput(
+                            attrs={"placeholder": f"Enter {attribute.name}"}
+                        ),
+                    )
+
+                elif attribute.attribute_type == "boolean":
+                    self.fields[field_name] = forms.ChoiceField(
+                        label=label,
+                        required=cat_attr.is_required,
+                        choices=[("", "---"), ("Yes", "Yes"), ("No", "No")],
+                        widget=forms.Select({"placeholder": f"Enter {attribute.name}"}),
+                    )
+
+                elif attribute.attribute_type == "choice":
+                    self.fields[field_name] = forms.CharField(
+                        label=label,
+                        required=cat_attr.is_required,
+                        widget=forms.TextInput(
+                            attrs={"placeholder": f"Enter {attribute.name}"}
+                        ),
+                    )
+                self.fields[field_name].attribute = attribute
+                self.fields[field_name].is_attribute_field = True
+
+        else:
+            return ValueError("error Please you must send category")
+
+    def get_attribute_fields(self):
+        return {
+            name: field
+            for name, field in self.fields.items()
+            if hasattr(field, "is_attribute_field")
         }
 
-
-class LaptopForm(forms.ModelForm):
-    class Meta:
-        model = Laptop
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe your laptop..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class TabletForm(forms.ModelForm):
-    class Meta:
-        model = Tablet
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe your tablet..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class HeadphoneForm(forms.ModelForm):
-    class Meta:
-        model = Headphone
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe your headphones..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class ClothingForm(forms.ModelForm):
-    class Meta:
-        model = Clothing
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe the clothing item..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class ShoeForm(forms.ModelForm):
-    class Meta:
-        model = Shoe
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe the shoes..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class WatchForm(forms.ModelForm):
-    class Meta:
-        model = Watch
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe the watch..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
-        }
-
-
-class SportEquipmentForm(forms.ModelForm):
-    class Meta:
-        model = SportEquipment
-        exclude = exclude
-        widgets = {
-            "description": forms.Textarea(
-                attrs={"rows": 4, "placeholder": "Describe the equipment..."}
-            ),
-            "price": forms.NumberInput(attrs={"step": "0.01"}),
-            "discount_price": forms.NumberInput(attrs={"step": "0.01"}),
+    def get_basic_fields(self):
+        return {
+            name: field
+            for name, field in self.fields.items()
+            if not hasattr(field, "is_attribute_field")
         }
 
 
@@ -145,12 +97,11 @@ class ProductImageForm(forms.ModelForm):
             raise forms.ValidationError("Please select an image")
 
         if ext not in allowed_formats:
-            print(f"=------------------{ext}=-------------------")
-            # raise forms.ValidationError(
-            #     f"Only {', '.join(allowed_formats).upper()} formats are allowed"
-            # )
-        # if image.size > 5 * 1024 * 1024:
-        #     raise forms.ValidationError("Image size must be less than 5MB")
+            raise forms.ValidationError(
+                f"Only {', '.join(allowed_formats).upper()} formats are allowed"
+            )
+        if image.size > 5 * 1024 * 1024:
+            raise forms.ValidationError("Image size must be less than 5MB")
         return image
 
 
@@ -171,7 +122,6 @@ class InventoryForm(forms.ModelForm):
         }
 
 
-# Add_Category_Form forms
 class Choosing_Category_Form(forms.ModelForm):
     class Meta:
         model = Category
@@ -186,7 +136,6 @@ class Choosing_Category_Form(forms.ModelForm):
         }
 
 
-# contact us forms
 class Contact_Us_Form(forms.ModelForm):
     class Meta:
         model = Contact
@@ -207,24 +156,7 @@ class Contact_Us_Form(forms.ModelForm):
         }
 
 
-PRODUCT_FORM_MAPPING = {
-    "phone": PhoneForm,
-    "laptop": LaptopForm,
-    "tablet": TabletForm,
-    "headphone": HeadphoneForm,
-    "clothing": ClothingForm,
-    "shoe": ShoeForm,
-    "watch": WatchForm,
-    "sport_equipment": SportEquipmentForm,
-}
-
-
-def get_product_form(model_name):
-    """
-    - this function i will used it to get the form of correct model
-    - i pass to it the model name from views
-    - the function will return the correct form class based on the model name that i pass it
-
-    """
-    print(model_name)
-    return PRODUCT_FORM_MAPPING.get(model_name.lower())
+class AddCategoriesForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ["name", "parent", "description"]

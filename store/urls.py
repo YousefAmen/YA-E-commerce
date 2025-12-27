@@ -42,7 +42,7 @@ urlpatterns = [
         name="update_product",
     ),
     path(
-        "update_products/delete/<slug:slug>/product/",
+        "update_products/delete/<slug:slug>/<uuid:id>/product/",
         views.delete_products,
         name="delete_products",
     ),

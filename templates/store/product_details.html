@@ -1,359 +1,16 @@
 {% extends 'base.html' %}
+
 {% load static %}
+{% load humanize %}
 {% block content %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/store/product_details.css' %}">
+{% endblock %}
 
 <head>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.3/css/lightbox.min.css" rel="stylesheet">
 </head>
-
-<style>
-  body {
-    background-color: #f8f9fa;
-  }
-
-  .product-detail-container {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    padding: 2rem;
-    margin-top: 2rem;
-    margin-bottom: 2rem;
-  }
-
-  /* Favorite Button */
-  .favorite-btn {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    z-index: 10;
-  }
-
-  .favorite-btn button {
-    background: white;
-    border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-  }
-
-  .favorite-btn button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  }
-
-  /* Main Product Image */
-  .main-product-image {
-    position: relative;
-    border-radius: 12px;
-    overflow: hidden;
-    background: #f8f9fa;
-    height: 500px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .main-product-image img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.3s ease;
-  }
-
-  .main-product-image:hover img {
-    transform: scale(1.05);
-  }
-
-  /* Thumbnail Gallery */
-  .thumbnail-gallery {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .thumbnail-item {
-    width: 80px;
-    height: 80px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .thumbnail-item:hover {
-    border-color: #667eea;
-    transform: translateY(-3px);
-    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
-  }
-
-  .thumbnail-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  /* Product Info */
-  .product-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 1rem;
-  }
-
-  .product-description {
-    color: #718096;
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-  }
-
-  /* Price Section */
-  .price-section {
-    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
-    padding: 1.5rem;
-    border-radius: 12px;
-    margin-bottom: 1.5rem;
-  }
-
-  .current-price {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #667eea;
-  }
-
-  .original-price {
-    font-size: 1.25rem;
-    color: #a0aec0;
-    text-decoration: line-through;
-    margin-left: 1rem;
-  }
-
-  .discount-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-    color: white;
-    padding: 0.25rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-left: 1rem;
-  }
-
-  /* Stock Info */
-  .stock-info {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-
-  .stock-available {
-    background: #d4edda;
-    color: #155724;
-  }
-
-  .stock-out {
-    background: #f8d7da;
-    color: #721c24;
-  }
-
-  /* Rating */
-  .product-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .star-rating {
-    color: #f6ad55;
-    font-size: 1.25rem;
-  }
-
-  /* Quantity Selector */
-  .quantity-section {
-    margin: 1.5rem 0;
-  }
-
-  .quantity-label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 0.5rem;
-    display: block;
-  }
-
-  .form-select {
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 0.75rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-  }
-
-  /* Action Buttons */
-  .action-buttons {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2rem;
-  }
-
-  .btn-add-cart {
-    flex: 1;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 1rem;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    transition: all 0.3s ease;
-  }
-
-  .btn-add-cart:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-  }
-
-  .btn-back-home {
-    background: white;
-    color: #667eea;
-    border: 2px solid #667eea;
-    padding: 1rem 2rem;
-    border-radius: 10px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-  }
-
-  .btn-back-home:hover {
-    background: #667eea;
-    color: white;
-  }
-
-  /* Product Meta */
-  .product-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-    margin: 1.5rem 0;
-    padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 10px;
-  }
-
-  .meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: #4a5568;
-  }
-
-  .meta-item i {
-    color: #667eea;
-    width: 20px;
-  }
-
-  /* Related Products */
-  .related-section {
-    margin-top: 4rem;
-    padding-top: 3rem;
-    border-top: 2px solid #e2e8f0;
-  }
-
-  .related-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #2d3748;
-    margin-bottom: 2rem;
-  }
-
-  .product-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    border: 1px solid #e2e8f0;
-    height: 100%;
-  }
-
-  .product-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    border-color: #667eea;
-  }
-
-  .product-card-img {
-    height: 250px;
-    object-fit: cover;
-    width: 100%;
-  }
-
-  .product-card-body {
-    padding: 1.25rem;
-  }
-
-  .product-card-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #2d3748;
-    text-decoration: none;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.5;
-  }
-
-  .product-card-title:hover {
-    color: #667eea;
-  }
-
-  /* Alert Messages */
-  #message-container {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 9999;
-    max-width: 400px;
-  }
-
-  .alert {
-    border-radius: 10px;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .main-product-image {
-      height: 300px;
-    }
-
-    .product-title {
-      font-size: 1.5rem;
-    }
-
-    .current-price {
-      font-size: 1.5rem;
-    }
-
-    .action-buttons {
-      flex-direction: column;
-    }
-
-    .btn-back-home {
-      width: 100%;
-    }
-  }
-</style>
 
 <body>
   <div class="container">
@@ -430,12 +87,12 @@
           <!-- Price -->
           <div class="price-section">
             {% if product.discount %}
-            <span class="current-price">${{ product.price }}</span>
+            <span class="current-price">${{ product.price|floatformat:2|intcomma }}</span>
             <span class="original-price">${{ product.discount }}</span>
-            <span class="discount-badge">Save ${{ product.discount|floatformat:2|add:"-"|add:product.price|floatformat:2
-              }}</span>
+            <span class="discount-badge">Save $
+              {{product.discount|floatformat:2|add:"-"|add:product.price|floatformat:2}}</span>
             {% else %}
-            <span class="current-price">${{ product.price }}</span>
+            <span class="current-price">${{ product.price|floatformat:2|intcomma }}</span>
             {% endif %}
           </div>
 
@@ -463,27 +120,52 @@
 
           <!-- Product Meta -->
           <div class="product-meta">
-            <div class="meta-item">
-              <i class="fas fa-calendar-alt"></i>
-              <span><strong>Added:</strong> {{ product.added|date:"F d, Y" }}</span>
-            </div>
-            <div class="meta-item">
-              <i class="fas fa-layer-group"></i>
-              <span><strong>Category:</strong> {{ product.category.name }}</span>
-            </div>
-
-            <div class="meta-item">
-              <i class="fas fa-layer-group"></i>
-              <span><strong>Registered:</strong> {{ product.views.count }}</span>
-            </div>
-            <div class="meta-item">
-              <i class="fas fa-layer-group"></i>
-              <span><strong>Total Views:</strong> {{ product.views_number }}</span>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="meta-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span><strong>Added:</strong> {{ product.added|date:"F d, Y" }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="meta-item">
+                  <i class="fas fa-layer-group"></i>
+                  <span><strong>Category:</strong> {{ product.category.name }}</span>
+                </div>
+              </div>
             </div>
 
+            <div class="row">
+              <div class="col-md-6">
+                <div class="meta-item">
+                  <i class="fas fa-layer-group"></i>
+                  <span><strong>Registered:</strong> {{ product.views.count }}</span>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="meta-item">
+                  <i class="fas fa-layer-group"></i>
+                  <span><strong>Total Views:</strong> {{ product.views_number }}</span>
+                </div>
 
+              </div>
+            </div>
+
+            {% for attribute in product.product_attribute.all %}
+            {% if forloop.counter0|divisibleby:2 %}
+            <div class="row">
+              {% endif %}
+              <div class="col-md-6">
+                <div class="meta-item">
+                  <i class="fas fa-layer-group"></i>
+                  <span><strong>{{ attribute.attribute.name }}:</strong> {{ attribute.value }}</span>
+                </div>
+              </div>
+              {% if forloop.counter|divisibleby:2 or forloop.last %}
+            </div>
+            {% endif %}
+            {% endfor %}
           </div>
-
           <!-- Quantity Selector -->
           {% if product.inventory.quantity > 0 %}
           <div class="quantity-section">
@@ -544,7 +226,8 @@
               {% endfor %}
               <div class="product-card-body">
                 <h5 class="product-card-title">{{ related_product.name }}</h5>
-                <p class="text-muted mb-0">${{ related_product.price }}</p>
+                <p class="text-muted">{{related_product.description|truncatewords:5}}</p>
+                <p class="text-muted mb-0">${{ related_product.price|floatformat:2|intcomma }}</p>
               </div>
             </div>
           </a>

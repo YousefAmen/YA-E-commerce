@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponseRedirect
-from .models import Product, Category, Contact
+from .models import *
 from django.urls import reverse
 
 from members.models import Merchant, Customer, User
-from .forms import Contact_Us_Form, get_product_form, ProductImageForm, InventoryForm
+from .forms import (
+    Contact_Us_Form,
+    ProductImageForm,
+    InventoryForm,
+    AddCategoriesForm,
+    DaynamicProductForm,
+)
 from django.contrib import messages
 from django.db.models import Q
 from payment.models import OrderItem, Order
@@ -14,6 +20,18 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_protect
+
+# MODEL_MAPPING = {
+#     "phone": Phone,
+#     "shoe": Shoe,
+#     "laptop": Laptop,
+#     "tablet": Tablet,
+#     "headphone": Headphone,
+#     "clothing": Clothing,
+#     "watch": Watch,
+#     "sportequipment": SportEquipment,
+#     "book": Book,
+# }
 
 
 def home(request):
@@ -30,15 +48,22 @@ def about(request):
 
 
 def product_details(request, slug, id):
-    product = get_object_or_404(Product, slug=slug, id=id)
+
+    product = Product.objects.get(slug=slug, id=id)
+    if not product:
+        messages.error(request, "Product not found.")
+        return redirect("home")
+
     related_products = Product.objects.filter(category=product.category).exclude(
         slug=product.slug
     )
+
     inventory = []
     for i in range(1, product.inventory.quantity + 1):
         inventory.append(i)
     session_key = f"viewed_product_{product.id}"
 
+    # views codebase
     if not request.session.get(session_key):
         request.session[session_key] = True
         product.views_number += 1
@@ -48,7 +73,6 @@ def product_details(request, slug, id):
 
         request.session[session_key] = True
         request.session.modified = True
-
     context = {
         "product": product,
         "inventory": inventory,
@@ -146,21 +170,29 @@ def choosing_sub_category(request, category_slug):
 def add_products(request, slug, id, sub_category):
     merchant = get_user(request, slug, id)
     sub_category_obj = get_object_or_404(Category, slug=sub_category)
-    get_form = get_product_form(sub_category_obj.model_name)
     if request.method == "POST":
-        form = get_form(request.POST)
+        form = DaynamicProductForm(category_id=sub_category_obj.id, data=request.POST)
         if form.is_valid():
             product = form.save(commit=False)
             product.merchant = merchant
             product.category = sub_category_obj
             product.save()
+
+            for field_name, value in form.cleaned_data.items():
+                if field_name.startswith("attr_") and value:
+                    attribute = form.fields[field_name].attribute
+
+                    ProductAttributeValue.objects.create(
+                        product=product, attribute=attribute, value=str(value)
+                    )
+
             messages.success(request, "Product details saved! Now add images.")
 
             return redirect("add_product_images", slug=product.slug, id=product.id)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
-        form = get_form()
+        form = DaynamicProductForm(category_id=sub_category_obj.id)
     context = {"form": form, "sub_category_obj": sub_category_obj}
     return render(request, "store/add_products.html", context)
 
@@ -234,33 +266,33 @@ def update_products(request):
 
 
 def update_product(request, slug, id):
-
+    user = get_user(request, slug=request.user.slug, id=request.user.id)
     product = Product.objects.get(slug=slug, id=id)
-    if product.merchant != request.user:
+    if product.merchant != user:
         messages.info(request, "you don't have a permission to perform this action.")
         return redirect("home")
 
-    get_form = get_product_form(product.category.model_name)
     if request.method == "POST":
-        form = get_form(request.POST)
+        form = DaynamicProductForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request, "Product Updated Successfully.")
-            return redirect("product-details", slug=product.slug, id=product.id)
+            return redirect("product_details", slug=product.slug, id=product.id)
         else:
             messages.info(
                 request,
                 "Invalid Informations Please Chack The Product Detalis And Try Agine",
             )
-    form = get_form(instance=product)
+    else:
+        form = DaynamicProductForm(instance=product)
     context = {"form": form}
     return render(request, "store/update_product.html", context)
 
 
 # delete products function onlay admins or staff can use this function
-def delete_products(request, slug):
+def delete_products(request, slug, id):
     try:
-        product = Product.objects.get(slug=slug)
+        product = Product.objects.get(slug=slug, id=id)
         if request.method == "POST":
             # delete the product
             product.delete()
@@ -275,8 +307,8 @@ def delete_products(request, slug):
 
 # add products function to can added products from the website only admins or staff can use this function
 def add_categories(request):
-    if request.method == "POST":
-        category_form = Add_Category_Form(request.POST)
+    if request.method == "POST" and request.user.is_staff:
+        category_form = AddCategoriesForm(request.POST)
         if category_form.is_valid():
             # save the category in database
             category_form.save()
@@ -287,8 +319,8 @@ def add_categories(request):
                 request,
                 "Category Is Not Add Please Chack The Category Name And Try Agine..",
             )
-    category_form = Add_Category_Form()
-    context = {"forms": category_form}
+    category_form = AddCategoriesForm()
+    context = {"form": category_form}
     return render(request, "store/add_categories.html", context)
 
 

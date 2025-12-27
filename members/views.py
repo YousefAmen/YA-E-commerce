@@ -20,12 +20,20 @@ from django.utils import timezone
 import datetime
 
 
-def get_user_object(slug, id):
+def get_user_object(request, slug, id):
     try:
-        user = User.objects.get(id=id, slug=slug)
-        return user
+        user = User.objects.get(slug=slug, id=id)
     except User.DoesNotExist:
-        return messages.error("this user is not exists.")
+        messages.error(
+            request, "sorry,there's a problem please re-registering a agine."
+        )
+    if user.role == "merchant":
+        merchant = Merchant.objects.get(user=user)
+    else:
+        customer = Customer.objects.get(user=user)
+    if merchant:
+        return merchant
+    return customer
 
 
 @login_required
@@ -49,18 +57,7 @@ def select_role(request):
 
 
 def profile(request, slug, id):
-    user = get_user_object(slug=slug, id=id)
-    profile = None
-
-    try:
-        if user.role == "merchant":
-
-            profile = Merchant.objects.get(user=user)
-        else:
-            profile = Customer.objects.get(user=user)
-    except Merchant.DoesNotExist:
-        return messages.info(request, "this user is not have profile.")
-
+    profile = get_user_object(request, slug=slug, id=id)
     context = {"profile": profile}
     return render(request, "account/user_profile.html", context)
 
@@ -69,17 +66,13 @@ def profile(request, slug, id):
 def update_profile(request, slug, id):
     profile = None
     profile_form = None
-    user = get_user_object(slug=slug, id=id)
-    if request.user != user:
+    profile = get_user_object(request, slug=slug, id=id)
+    if request.user != profile.user:
         messages.error(request, "you don't have permission to edit this profile.")
         return redirect("profile", slug=request.user.slug, id=request.user.id)
 
-    if user.role == "merchant":
-        profile = Merchant.objects.get(user=user)
-    else:
-        profile = Customer.objects.get(user=user)
     if request.method == "POST":
-        if user.role == "merchant":
+        if profile.user.role == "merchant":
             profile_form = MerchentForm(request.POST, request.FILES, instance=profile)
         else:
             profile_form = CustomerForm(request.POST, request.FILES, instance=profile)
@@ -93,8 +86,8 @@ def update_profile(request, slug, id):
         else:
             messages.error(request, "Please correct the errors below.")
     else:
-        user_form = UserForm(instance=user)
-        if user.role == "merchant":
+        user_form = UserForm(instance=profile)
+        if profile.user.role == "merchant":
             profile_form = MerchentForm(instance=profile)
         else:
             profile_form = CustomerForm(instance=profile)
@@ -119,26 +112,22 @@ class DeleteUserProfile(DeleteView):
 
 @login_required
 def complete_merchant(request, slug, id):
-    user = get_user_object(slug=slug, id=id)
-    try:
-        if request.user.role == "merchant":
-            merchant = Merchant.objects.get(user=user)
-    except Merchant.DoesNotExist:
+    profile = get_user_object(request, slug=slug, id=id)
+    if profile.user.role != "merchant":
         messages.error(
             request, "this user is not have a merchant, please create a new account."
         )
-        user.delete()
         return redirect("account_login")
     if request.method == "POST":
-        form = MerchentForm(request.POST, instance=merchant)
+        form = MerchentForm(request.POST, instance=profile)
         if form.is_valid():
             form.save()
             messages.success(request, "saved successfully.")
-            return redirect("profile", slug=user.slug, id=user.id)
+            return redirect("profile", slug=profile.user.slug, id=profile.user.id)
         else:
             messages.error(request, "Please correct the errors below.")
     else:
-        form = MerchentForm(instance=merchant)
+        form = MerchentForm(instance=profile)
     return render(request, "account/complete_merchant.html", {"form": form})
 
 
@@ -158,12 +147,10 @@ def merchant_grows_metrics(merchant):
         )
         last_month_end = this_month_start
     else:
-        # that's is give my the last month like if we in february that's code is give you the results of january month
         last_month_start = now.replace(
             month=now.month - 1, day=1, hour=0, minute=0, second=0, microsecond=0
         )
         last_month_end = this_month_start
-    # get the month analyzes
     this_month_orders = Order.objects.filter(
         merchant=merchant, order_time__gte=this_month_start
     )
@@ -172,7 +159,6 @@ def merchant_grows_metrics(merchant):
     )
     this_month_orders_count = this_month_orders.count()
 
-    # get last month analyzes
     last_month_orders = Order.objects.filter(
         merchant=merchant,
         order_time__gte=last_month_start,
@@ -323,3 +309,19 @@ def admins_dashboard(request):
         "top_products": top_products,
     }
     return render(request, "account/admins_dashboard.html", context)
+
+
+def all_merchant_products(request):
+    profile = get_user_object(request, slug=request.user.slug, id=request.user.id)
+    if profile.user.role != "merchant":
+        messages.info(request, "you don't have a permission to perform this action.")
+        return redirect("home")
+    products = (
+        Product.objects.filter(merchant=profile)
+        .annotate(view_count=Sum("views_number"))
+        .filter(view_count__gt=0)
+        .order_by("-view_count")
+    )
+    print(products)
+    context = {"products": products, "merchant": profile}
+    return render(request, "store/all_merchant_products.html", context)

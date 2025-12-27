@@ -23,7 +23,6 @@ class Category(models.Model):
             MinLengthValidator(3, "the field must contain at least 20 character")
         ],
     )
-    model_name = models.CharField(max_length=50, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True)
 
@@ -130,12 +129,50 @@ class Product(models.Model):
     def sold_count(self):
         return self.product.count()
 
-    @property
-    def views_count(self):
-        return self.views.count()
-
     def __str__(self):
         return self.name
+
+
+class Attribute(models.Model):
+    ATTRIBUTE_TYPES = (
+        ("text", "Text"),
+        ("number", "Number"),
+        ("boolean", "Yes/No"),
+        ("choice", "Dropdown"),
+    )
+
+    name = models.CharField(max_length=100)
+    attribute_type = models.CharField(max_length=20, choices=ATTRIBUTE_TYPES)
+    unit = models.CharField(max_length=50, blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.unit})" if self.unit else self.name
+
+
+class CategoryAttribute(models.Model):
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
+    is_required = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ("category", "attribute")
+
+    def __str__(self):
+        return f"{self.category.name} - {self.attribute.name}"
+
+
+class ProductAttributeValue(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="product_attribute"
+    )
+    attribute = models.ForeignKey(Attribute, on_delete=models.CASCADE)
+    value = models.CharField(max_length=500)
+
+    class Meta:
+        unique_together = ("product", "attribute")
+
+    def __str__(self):
+        return f"{self.product.name} - {self.attribute.name}: {self.value}"
 
 
 class ProductImage(models.Model):
@@ -159,279 +196,6 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - Stock: {self.quantity}"
-
-
-class Phone(Product):
-    screen_size = models.FloatField(help_text="In inches")
-    screen_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("AMOLED", "AMOLED"),
-            ("LCD", "LCD"),
-            ("OLED", "OLED"),
-            ("IPS", "IPS"),
-        ],
-    )
-    processor = models.CharField(max_length=100)
-    ram = models.IntegerField(help_text="In GB")
-    storage = models.IntegerField(help_text="In GB")
-    battery_capacity = models.IntegerField(help_text="In mAh")
-    rear_camera = models.CharField(max_length=100, help_text="e.g., 48MP + 12MP")
-    front_camera = models.CharField(max_length=50, help_text="e.g., 12MP")
-    operating_system = models.CharField(
-        max_length=50,
-        choices=[("Android", "Android"), ("iOS", "iOS"), ("Other", "Other")],
-    )
-    network = models.CharField(max_length=20, choices=[("4G", "4G"), ("5G", "5G")])
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Phones"
-
-
-class Laptop(Product):
-    screen_size = models.FloatField(help_text="In inches")
-    processor = models.CharField(max_length=100, help_text="e.g., Intel Core i7")
-    processor_generation = models.CharField(max_length=50)
-    ram = models.IntegerField(help_text="In GB")
-    storage_type = models.CharField(
-        max_length=20, choices=[("SSD", "SSD"), ("HDD", "HDD"), ("Hybrid", "Hybrid")]
-    )
-    storage_capacity = models.IntegerField(help_text="In GB")
-    graphics_card = models.CharField(max_length=100)
-    operating_system = models.CharField(
-        max_length=50,
-        choices=[
-            ("Windows 11", "Windows 11"),
-            ("Windows 10", "Windows 10"),
-            ("macOS", "macOS"),
-            ("Linux", "Linux"),
-        ],
-    )
-    battery_life = models.IntegerField(help_text="In hours")
-    weight = models.FloatField(help_text="In kg")
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Laptops"
-
-
-class Tablet(Product):
-    screen_size = models.FloatField(help_text="In inches")
-    processor = models.CharField(max_length=100)
-    ram = models.IntegerField(help_text="In GB")
-    storage = models.IntegerField(help_text="In GB")
-    battery_capacity = models.IntegerField(help_text="In mAh")
-    camera = models.CharField(max_length=50)
-    operating_system = models.CharField(
-        max_length=50,
-        choices=[("Android", "Android"), ("iOS", "iOS"), ("Windows", "Windows")],
-    )
-    has_sim_card = models.BooleanField(default=False)
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Tablets"
-
-
-class Headphone(Product):
-    """Headphones and Earphones"""
-
-    headphone_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("Over-Ear", "Over-Ear"),
-            ("On-Ear", "On-Ear"),
-            ("In-Ear", "In-Ear"),
-            ("Earbuds", "Earbuds"),
-        ],
-    )
-    connection_type = models.CharField(
-        max_length=20, choices=[("Wireless", "Wireless"), ("Wired", "Wired")]
-    )
-    noise_cancellation = models.BooleanField(default=False)
-    battery_life = models.IntegerField(help_text="In hours", null=True, blank=True)
-    driver_size = models.IntegerField(help_text="In mm", null=True, blank=True)
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Headphones"
-
-
-class Clothing(Product):
-    clothing_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("T-Shirt", "T-Shirt"),
-            ("Shirt", "Shirt"),
-            ("Pants", "Pants"),
-            ("Jeans", "Jeans"),
-            ("Dress", "Dress"),
-            ("Jacket", "Jacket"),
-            ("Sweater", "Sweater"),
-        ],
-    )
-    gender = models.CharField(
-        max_length=20,
-        choices=[("Men", "Men"), ("Women", "Women"), ("Unisex", "Unisex")],
-    )
-    size = models.CharField(
-        max_length=10,
-        choices=[
-            ("XS", "XS"),
-            ("S", "S"),
-            ("M", "M"),
-            ("L", "L"),
-            ("XL", "XL"),
-            ("XXL", "XXL"),
-        ],
-    )
-    color = models.CharField(max_length=50)
-    material = models.CharField(max_length=100, help_text="e.g., Cotton, Polyester")
-    season = models.CharField(
-        max_length=20,
-        choices=[
-            ("Summer", "Summer"),
-            ("Winter", "Winter"),
-            ("All Season", "All Season"),
-        ],
-    )
-
-    class Meta:
-        verbose_name_plural = "Clothing"
-
-
-class Shoe(Product):
-    shoe_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("Sneakers", "Sneakers"),
-            ("Boots", "Boots"),
-            ("Sandals", "Sandals"),
-            ("Formal", "Formal"),
-            ("Sports", "Sports"),
-        ],
-    )
-    gender = models.CharField(
-        max_length=20,
-        choices=[("Men", "Men"), ("Women", "Women"), ("Unisex", "Unisex")],
-    )
-    size = models.IntegerField(help_text="US size")
-    color = models.CharField(max_length=50)
-    material = models.CharField(max_length=100, help_text="e.g., Leather, Canvas")
-
-    class Meta:
-        verbose_name_plural = "Shoes"
-
-
-class Watch(Product):
-    watch_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("Analog", "Analog"),
-            ("Digital", "Digital"),
-            ("Smart Watch", "Smart Watch"),
-        ],
-    )
-    gender = models.CharField(
-        max_length=20,
-        choices=[("Men", "Men"), ("Women", "Women"), ("Unisex", "Unisex")],
-    )
-    strap_material = models.CharField(
-        max_length=50,
-        choices=[
-            ("Leather", "Leather"),
-            ("Metal", "Metal"),
-            ("Rubber", "Rubber"),
-            ("Fabric", "Fabric"),
-        ],
-    )
-    water_resistant = models.BooleanField(default=False)
-    display_type = models.CharField(max_length=50, null=True, blank=True)
-    battery_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("Quartz", "Quartz"),
-            ("Automatic", "Automatic"),
-            ("Rechargeable", "Rechargeable"),
-        ],
-    )
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Watches"
-
-
-class SportEquipment(Product):
-    """Sports Equipment"""
-
-    sport_type = models.CharField(
-        max_length=50,
-        choices=[
-            ("Football", "Football"),
-            ("Basketball", "Basketball"),
-            ("Tennis", "Tennis"),
-            ("Gym", "Gym"),
-            ("Cycling", "Cycling"),
-            ("Swimming", "Swimming"),
-        ],
-    )
-    equipment_type = models.CharField(
-        max_length=100, help_text="e.g., Ball, Racket, Dumbbell"
-    )
-    material = models.CharField(max_length=100)
-    size = models.CharField(max_length=50, null=True, blank=True)
-    weight = models.FloatField(help_text="In kg", null=True, blank=True)
-    color = models.CharField(max_length=50)
-
-    class Meta:
-        verbose_name_plural = "Sport Equipment"
-
-
-class Book(Product):
-    author = models.CharField(max_length=255, blank=True)
-    publisher = models.CharField(max_length=255, blank=True)
-    isbn = models.CharField(max_length=13, blank=True)
-    pages = models.PositiveIntegerField(null=True, blank=True)
-
-    class Meta:
-        verbose_name_plural = "Books"
-
-
-class Review(models.Model):
-    RATING_CHOICES = (
-        (1, "1 - Poor"),
-        (2, "2 - Fair"),
-        (3, "3 - Good"),
-        (4, "4 - Vary Good"),
-        (5, "5 - Excellent"),
-    )
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="product_reviews"
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_reviews"
-    )
-
-    rate = models.PositiveSmallIntegerField(
-        choices=RATING_CHOICES, null=True, blank=True
-    )
-    body = models.TextField(max_length=300)
-    slug = models.SlugField(default="")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        unique_together = ["product", "user"]
-
-    def save(self, *args, **kwargs):
-
-        self.slug = slugify(self.body[:50])
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Reviewing by {self.user.first_name} {self.user.last_name} for {self.course}"
 
 
 class Contact(models.Model):

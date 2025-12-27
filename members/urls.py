@@ -29,4 +29,9 @@ urlpatterns = [
         views.admins_dashboard,
         name="admins_dashboard",
     ),
+    path(
+        "all/merchant/products/",
+        views.all_merchant_products,
+        name="all_merchant_products",
+    ),
 ]
